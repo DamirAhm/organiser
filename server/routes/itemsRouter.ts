@@ -4,7 +4,7 @@ import { STATUS_CODES } from '../constants';
 import ItemModel from '../database/models/item';
 import { ObjectId } from 'mongoose';
 import SectionModel from '../database/models/section';
-import itemPopulation, { populateSubItems } from '../database/population/itemPopulation';
+import { populateSubItems } from '../database/population/itemPopulation';
 import { populateItems } from '../database/population/sectionPopulation';
 
 // ? Path: /items

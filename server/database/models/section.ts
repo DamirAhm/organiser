@@ -15,7 +15,11 @@ const SectionSchema = new Schema<Section>( {
 		ref: "User",
 		required: true,
 	},
-	items: {},
+	items: {
+		type: [SchemaTypes.ObjectId],
+		ref: "Item",
+		default: []
+	},
 } );
 
 const SectionModel = model( 'Section', SectionSchema );

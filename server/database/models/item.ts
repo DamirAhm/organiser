@@ -30,10 +30,12 @@ const ItemSchema = new Schema<Item>( {
 	section: {
 		type: SchemaTypes.ObjectId,
 		ref: "Section",
+		default: null
 	},
 	parent: {
 		type: SchemaTypes.ObjectId,
 		ref: "Item",
+		default: null
 	},
 } );
 
