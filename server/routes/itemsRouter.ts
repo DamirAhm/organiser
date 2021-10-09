@@ -1,5 +1,5 @@
 import { FastifyPluginCallback } from "fastify";
-import { Item } from '../types';
+import { Deleted, Item } from '../types';
 import { STATUS_CODES } from '../constants';
 import ItemModel from '../database/models/item';
 import { ObjectId } from 'mongoose';
@@ -16,9 +16,21 @@ const itemsRouter: FastifyPluginCallback<any, any> = (router, opts, done) => {
 			res.status( STATUS_CODES.BAD );
 
 			return { error: 'You must put title in your request' };
+
+		} else if ( !parent && !section ) {
+			res.status( STATUS_CODES.BAD );
+
+			return { error: 'You must put one of parentId or sectionId in your request' };
 		}
 
-		const newItem = await ItemModel.create( { title, description, files, tags, parent, section } );
+		const newItem = await ItemModel.create( {
+			title,
+			description,
+			files,
+			tags,
+			parent,
+			section,
+		} );
 		await newItem.save();
 
 		if ( parent ) {
@@ -27,13 +39,25 @@ const itemsRouter: FastifyPluginCallback<any, any> = (router, opts, done) => {
 			if ( parentItem === null ) {
 				res.status( STATUS_CODES.BAD );
 
-				return { error: "Parent property must be string or ObjectId" };
+				return { error: "Can't find parent" };
 			}
 
 			parentItem.subItems.push( newItem.id );
 			await parentItem.save();
-
 		}
+		if ( section ) {
+			const parentSection = await SectionModel.findById( section );
+
+			if ( parentSection === null ) {
+				res.status( STATUS_CODES.BAD );
+
+				return { error: "Can't find section" };
+			}
+
+			parentSection.items.push( newItem.id );
+			await parentSection.save();
+		}
+
 		return { payload: newItem }
 	} )
 
@@ -50,7 +74,7 @@ const itemsRouter: FastifyPluginCallback<any, any> = (router, opts, done) => {
 
 
 		if ( itemToDelete === null ) return {};
-		const deleted: ObjectId[] = [ itemToDelete.id ];
+		const deleted: Deleted = { items: [ itemToDelete.id ] };
 
 		if ( itemToDelete.parent !== null ) {
 			const parentItem = await ItemModel.findById( itemToDelete.parent );
@@ -71,7 +95,7 @@ const itemsRouter: FastifyPluginCallback<any, any> = (router, opts, done) => {
 		if ( itemToDelete.subItems.length !== 0 ) {
 			for ( const subItemId of itemToDelete.subItems ) {
 				await ItemModel.deleteOne( { _id: subItemId } );
-				deleted.push( subItemId );
+				deleted.items?.push( subItemId );
 			}
 		}
 
@@ -89,7 +113,7 @@ const itemsRouter: FastifyPluginCallback<any, any> = (router, opts, done) => {
 		if ( itemId && sectionId ) {
 			res.status( STATUS_CODES.BAD );
 
-			return { error: "You can`t pass both id and section params, pass one at a time" }
+			return { error: "You can`t pass both id and sectionId params, pass one at a time" }
 		}
 		if ( itemId ) {
 			const item = await ItemModel.findById( itemId );
@@ -102,10 +126,10 @@ const itemsRouter: FastifyPluginCallback<any, any> = (router, opts, done) => {
 		}
 		if ( sectionId ) {
 			//TODO check if user owns section or not
-			const section = await SectionModel.findById( sectionId );
+			const parentSection = await SectionModel.findById( sectionId );
 
-			if ( section !== null ) {
-				const populatedSection = await populateItems( section );
+			if ( parentSection !== null ) {
+				const populatedSection = await populateItems( parentSection );
 
 				return { payload: populatedSection.items };
 			}
@@ -125,7 +149,7 @@ const itemsRouter: FastifyPluginCallback<any, any> = (router, opts, done) => {
 			return { error: "Can`t find item" };
 		}
 
-		const { update } = req.body as { update: Partial<Item> } | null
+		const { update } = req.body as { update: Partial<Item> | null }
 
 		if ( update === null ) {
 			res.status( STATUS_CODES.BAD )
@@ -133,11 +157,14 @@ const itemsRouter: FastifyPluginCallback<any, any> = (router, opts, done) => {
 			return { error: "You must pass updates object to body" }
 		}
 
-		for ( const key: keyof Item in update ) {
+		for ( const key in update ) {
 			if ( update.hasOwnProperty( key ) ) {
 				if ( key === 'id' || key === '_id' ) {
 					res.status( STATUS_CODES.BAD );
 					return { error: "You can`t change item id" }
+				} else if ( key === 'subItems' ) {
+					res.status( STATUS_CODES.BAD );
+					return { error: "You can't change subItems" }
 				}
 
 				if ( key === 'parent' ) {
@@ -179,6 +206,7 @@ const itemsRouter: FastifyPluginCallback<any, any> = (router, opts, done) => {
 					}
 				}
 
+				//@ts-ignore
 				item[key] = update[key];
 			}
 		}
