@@ -9,7 +9,6 @@ import { populateItems } from '../database/population/sectionPopulation';
 
 // ? Path: /items
 const itemsRouter: FastifyPluginCallback<any, RawServerDefault> = (router, opts, done) => {
-	//@ts-ignore
 	router.post( '/', async (req, res) => {
 		const { title, description, files, tags, parent, section } = req.body as Partial<Item>;
 
@@ -61,13 +60,20 @@ const itemsRouter: FastifyPluginCallback<any, RawServerDefault> = (router, opts,
 				await parentItem.save();
 			}
 		}
+		if (itemToDelete.section !== null) {
+			const section = await SectionModel.findById(itemToDelete.section);
+
+			if (section) {
+				section.items = section.items.filter(id => id.toString() !== itemId);
+				await section.save();
+			}
+		}
 		if ( itemToDelete.subItems.length !== 0 ) {
 			for ( const subItemId of itemToDelete.subItems ) {
 				await ItemModel.deleteOne( { _id: subItemId } );
 				deleted.push( subItemId );
 			}
 		}
-
 
 		return { payload: deleted };
 	} )
