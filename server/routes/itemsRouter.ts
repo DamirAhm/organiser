@@ -1,8 +1,11 @@
 import { FastifyPluginCallback, RawServerDefault } from "fastify";
 import { Item } from '../types';
-import { RESPONSE_TYPES, STATUS_CODES } from '../constants';
+import { STATUS_CODES } from '../constants';
 import ItemModel from '../database/models/item';
 import { ObjectId } from 'mongoose';
+import SectionModel from '../database/models/section';
+import itemPopulation, { populateSubItems } from '../database/population/itemPopulation';
+import { populateItems } from '../database/population/sectionPopulation';
 
 // ? Path: /items
 const itemsRouter: FastifyPluginCallback<any, RawServerDefault> = (router, opts, done) => {
@@ -12,7 +15,7 @@ const itemsRouter: FastifyPluginCallback<any, RawServerDefault> = (router, opts,
 
 		if ( !title ) {
 			res.status( STATUS_CODES.BAD );
-			res.type( RESPONSE_TYPES.JSON )
+
 			return { error: 'You must put title in your request' };
 		}
 
@@ -24,7 +27,7 @@ const itemsRouter: FastifyPluginCallback<any, RawServerDefault> = (router, opts,
 
 			if ( parentItem === null ) {
 				res.status( STATUS_CODES.BAD );
-				res.type( RESPONSE_TYPES.JSON );
+
 				return { error: "Parent property must be string or ObjectId" };
 			}
 
@@ -40,7 +43,7 @@ const itemsRouter: FastifyPluginCallback<any, RawServerDefault> = (router, opts,
 
 		if ( !itemId || typeof itemId !== 'string' ) {
 			res.status( STATUS_CODES.BAD );
-			res.type( RESPONSE_TYPES.JSON );
+
 			return { error: "You must pass id with type string" }
 		}
 
@@ -69,6 +72,41 @@ const itemsRouter: FastifyPluginCallback<any, RawServerDefault> = (router, opts,
 		return { payload: deleted };
 	} )
 
+	router.get( '/', async (req, res) => {
+		const { id: itemId, sectionId } = req.query as { id: unknown, sectionId: unknown };
+
+		if (!itemId && !sectionId) {
+			res.status(STATUS_CODES.BAD);
+
+			return {error: "You must pass any of id or sectionId"}
+		}
+		if (itemId && sectionId) {
+			res.status(STATUS_CODES.BAD);
+
+			return {error: "You can`t pass both id and section params, pass one at a time"}
+		}
+		if (itemId) {
+			const item = await ItemModel.findById(itemId);
+
+			if (item !== null) {
+				return {payload: await populateSubItems(item)}
+			}
+
+			return {payload: null}
+		}
+		if (sectionId) {
+			//TODO check if user owns section or not
+			const section = await SectionModel.findById(sectionId);
+
+			if (section !== null) {
+				const populatedSection = await populateItems(section);
+
+				return {payload: populatedSection.items};
+			}
+
+			return {payload: null}
+		}
+	} )
 
 	done();
 }
