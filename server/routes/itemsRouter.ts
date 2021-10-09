@@ -1,4 +1,4 @@
-import { FastifyPluginCallback, RawServerDefault } from "fastify";
+import { FastifyPluginCallback } from "fastify";
 import { Item } from '../types';
 import { STATUS_CODES } from '../constants';
 import ItemModel from '../database/models/item';
@@ -8,7 +8,7 @@ import { populateSubItems } from '../database/population/itemPopulation';
 import { populateItems } from '../database/population/sectionPopulation';
 
 // ? Path: /items
-const itemsRouter: FastifyPluginCallback<any, RawServerDefault> = (router, opts, done) => {
+const itemsRouter: FastifyPluginCallback<any, any> = (router, opts, done) => {
 	router.post( '/', async (req, res) => {
 		const { title, description, files, tags, parent, section } = req.body as Partial<Item>;
 
@@ -60,11 +60,11 @@ const itemsRouter: FastifyPluginCallback<any, RawServerDefault> = (router, opts,
 				await parentItem.save();
 			}
 		}
-		if (itemToDelete.section !== null) {
-			const section = await SectionModel.findById(itemToDelete.section);
+		if ( itemToDelete.section !== null ) {
+			const section = await SectionModel.findById( itemToDelete.section );
 
-			if (section) {
-				section.items = section.items.filter(id => id.toString() !== itemId);
+			if ( section ) {
+				section.items = section.items.filter( id => id.toString() !== itemId );
 				await section.save();
 			}
 		}
@@ -81,39 +81,114 @@ const itemsRouter: FastifyPluginCallback<any, RawServerDefault> = (router, opts,
 	router.get( '/', async (req, res) => {
 		const { id: itemId, sectionId } = req.query as { id: unknown, sectionId: unknown };
 
-		if (!itemId && !sectionId) {
-			res.status(STATUS_CODES.BAD);
+		if ( !itemId && !sectionId ) {
+			res.status( STATUS_CODES.BAD );
 
-			return {error: "You must pass any of id or sectionId"}
+			return { error: "You must pass any of id or sectionId" }
 		}
-		if (itemId && sectionId) {
-			res.status(STATUS_CODES.BAD);
+		if ( itemId && sectionId ) {
+			res.status( STATUS_CODES.BAD );
 
-			return {error: "You can`t pass both id and section params, pass one at a time"}
+			return { error: "You can`t pass both id and section params, pass one at a time" }
 		}
-		if (itemId) {
-			const item = await ItemModel.findById(itemId);
+		if ( itemId ) {
+			const item = await ItemModel.findById( itemId );
 
-			if (item !== null) {
-				return {payload: await populateSubItems(item)}
+			if ( item !== null ) {
+				return { payload: await populateSubItems( item ) }
 			}
 
-			return {payload: null}
+			return { payload: null }
 		}
-		if (sectionId) {
+		if ( sectionId ) {
 			//TODO check if user owns section or not
-			const section = await SectionModel.findById(sectionId);
+			const section = await SectionModel.findById( sectionId );
 
-			if (section !== null) {
-				const populatedSection = await populateItems(section);
+			if ( section !== null ) {
+				const populatedSection = await populateItems( section );
 
-				return {payload: populatedSection.items};
+				return { payload: populatedSection.items };
 			}
 
-			return {payload: null}
+			return { payload: null }
 		}
+	} )
+
+	router.put( '/:id', async (req, res) => {
+		const { id: itemId } = req.params as { id: string };
+
+		const item = await ItemModel.findById( itemId );
+
+		if ( item === null ) {
+			res.status( STATUS_CODES.BAD )
+
+			return { error: "Can`t find item" };
+		}
+
+		const { update } = req.body as { update: Partial<Item> } | null
+
+		if ( update === null ) {
+			res.status( STATUS_CODES.BAD )
+
+			return { error: "You must pass updates object to body" }
+		}
+
+		for ( const key: keyof Item in update ) {
+			if ( update.hasOwnProperty( key ) ) {
+				if ( key === 'id' || key === '_id' ) {
+					res.status( STATUS_CODES.BAD );
+					return { error: "You can`t change item id" }
+				}
+
+				if ( key === 'parent' ) {
+					const parentItem = await ItemModel.findById( item.parent );
+
+					if ( parentItem !== null ) {
+						parentItem.subItems = parentItem.subItems.filter( id => id.toString() === itemId );
+						await parentItem.save();
+					}
+
+					if ( update[key] !== null ) {
+						const newParentItem = await ItemModel.findById( update[key] );
+
+						if ( newParentItem !== null ) {
+							newParentItem.subItems.push( item._id );
+							await newParentItem.save();
+						} else {
+							update[key] = null;
+						}
+					}
+				}
+				if ( key === 'section' ) {
+					const section = await SectionModel.findById( item.section );
+
+					if ( section !== null ) {
+						section.items = section.items.filter( id => id.toString() === itemId );
+						await section.save();
+					}
+
+					if ( update[key] !== null ) {
+						const newSection = await SectionModel.findById( update[key] );
+
+						if ( newSection !== null ) {
+							newSection.items.push( item._id );
+							await newSection.save();
+						} else {
+							update[key] = null;
+						}
+					}
+				}
+
+				item[key] = update[key];
+			}
+		}
+
+		await item.save()
+
+		return { payload: item }
 	} )
 
 	done();
 }
+
 export default itemsRouter
