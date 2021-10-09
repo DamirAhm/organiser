@@ -3,7 +3,7 @@ import config from './database/config/config'
 import fastify from 'fastify';
 import fastifyExpress from 'fastify-express'
 import cors from 'cors';
-import { itemsRouter } from './routes';
+import { itemsRouter, sectionsRouter } from './routes';
 
 export const app = fastify();
 
@@ -13,6 +13,7 @@ export const app = fastify();
 		console.log( 'DataBase connected' );
 
 		await app.register( itemsRouter, {prefix: '/items'} );
+		await app.register( sectionsRouter, {prefix: '/sections'} );
 		await app.register( fastifyExpress );
 		app.use( cors() );
 

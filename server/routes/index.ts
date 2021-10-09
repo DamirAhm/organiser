@@ -1,2 +1,4 @@
 import itemsRouter from './itemsRouter';
-export {itemsRouter};
+import sectionsRouter from './sectionsRouter';
+
+export { itemsRouter, sectionsRouter };

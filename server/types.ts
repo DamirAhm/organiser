@@ -23,7 +23,7 @@ export interface ItemDocument extends Document<Item> {
 	parent: Id | null,
 	section: Id | null
 }
-const a = {}
+
 export interface ItemModel extends Model<ItemDocument> {
 }
 
@@ -81,3 +81,9 @@ export interface PopulatedUser extends Omit<UserDocument, "sections"> {
 export type Name = string;
 export type Id = ObjectId;
 export type AvatarUrl = string
+
+export type Deleted = {
+	items?: ObjectId[]
+	sections?: ObjectId[]
+	users?: ObjectId[]
+}
