@@ -1,9 +1,7 @@
 import { FastifyPluginCallback } from "fastify";
 import { Deleted, Item } from '../types';
 import { STATUS_CODES } from '../constants';
-import ItemModel from '../database/models/item';
-import { ObjectId } from 'mongoose';
-import SectionModel from '../database/models/section';
+import { ItemModel, SectionModel } from '../database/models';
 import { populateSubItems } from '../database/population/itemPopulation';
 import { populateItems } from '../database/population/sectionPopulation';
 

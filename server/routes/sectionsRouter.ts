@@ -1,10 +1,8 @@
 import { FastifyPluginCallback } from "fastify";
 import { Deleted, Section } from '../types';
 import { STATUS_CODES } from '../constants';
-import SectionModel from '../database/models/section';
+import { UserModel, SectionModel, ItemModel } from '../database/models';
 import { populateItems } from '../database/population/sectionPopulation';
-import UserModel from '../database/models/user';
-import ItemModel from '../database/models/item';
 import { populateSections } from '../database/population/userPopulation';
 
 // ? Path: /items

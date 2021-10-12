@@ -79,11 +79,11 @@ export interface PopulatedUser extends Omit<UserDocument, "sections"> {
 }
 
 export type Name = string;
-export type Id = ObjectId;
+export type Id = string;
 export type AvatarUrl = string
 
 export type Deleted = {
-	items?: ObjectId[]
-	sections?: ObjectId[]
-	users?: ObjectId[]
+	items?: Id[]
+	sections?: Id[]
+	users?: Id[]
 }
