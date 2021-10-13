@@ -1,8 +1,8 @@
 import { FastifyPluginCallback } from "fastify";
-import { Deleted, User } from '../types';
+import { Deleted, Id, Section, User } from '../types';
 import { STATUS_CODES } from '../constants';
 import { UserModel, SectionModel } from '../database/models';
-import { populateSections } from '../database/population/userPopulation';
+import { populateSections } from '../database/population';
 
 // ? Path: /items
 const usersRouter: FastifyPluginCallback<any, any> = (router, opts, done) => {
@@ -103,6 +103,29 @@ const usersRouter: FastifyPluginCallback<any, any> = (router, opts, done) => {
 
 		return { payload: user }
 	} )
+
+	router.post("/addSection", async (req, res) => {
+		const {to, section} = req.body as { to?: Id, section?: Section}
+
+		if (!to || !section) {
+			res.status(STATUS_CODES.BAD);
+		}
+
+		const newSection = await SectionModel.create(section);
+		await newSection.save();
+
+		const user = await UserModel.findById(to);
+
+		if (!user) {
+			res.status(STATUS_CODES.BAD);
+			return {error: "Can't find user"}
+		}
+
+		user.sections.push(newSection._id);
+		await user.save();
+
+		return {payload: section};
+	})
 
 	done();
 }
