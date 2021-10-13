@@ -1,9 +1,8 @@
 import { FastifyPluginCallback } from "fastify";
-import { Deleted, Item } from '../types';
+import { Deleted, Id, Item } from '../types';
 import { STATUS_CODES } from '../constants';
 import { ItemModel, SectionModel } from '../database/models';
-import { populateSubItems } from '../database/population/itemPopulation';
-import { populateItems } from '../database/population/sectionPopulation';
+import { populateItems, populateSubItems } from '../database/population';
 
 // ? Path: /items
 const itemsRouter: FastifyPluginCallback<any, any> = (router, opts, done) => {
@@ -212,6 +211,30 @@ const itemsRouter: FastifyPluginCallback<any, any> = (router, opts, done) => {
 		await item.save()
 
 		return { payload: item }
+	} )
+
+	router.post( '/addSubItem', async (req, res) => {
+		const { to, item: newSubItem } = req.body as { to?: Id, item?: Item };
+
+		if ( !to || !newSubItem ) {
+			res.status( STATUS_CODES.BAD );
+			return { error: "You must pass both id and item to body" }
+		}
+
+		const newItem = await ItemModel.create( newSubItem );
+		await newItem.save();
+
+		const parentItem = ItemModel.findById( to );
+
+		if ( !parentItem ) {
+			res.status( STATUS_CODES.BAD );
+			return { error: "Can't find parent item" };
+		}
+
+		parentItem.subItems.push( newItem._id );
+		await parentItem.save();
+
+		return { payload: newItem }
 	} )
 
 	done();

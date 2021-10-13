@@ -7,21 +7,13 @@ export interface Item {
 	subItems: Id[],
 	tags: string[],
 	pinned: boolean,
-	id: Id,
 	parent: Id | null,
 	section: Id | null
 }
 
-export interface ItemDocument extends Document<Item> {
-	files: string[],
-	title: string,
-	description: string,
-	subItems: Id[],
-	tags: string[],
-	pinned: boolean,
-	id: Id,
-	parent: Id | null,
-	section: Id | null
+export type ItemDocument = Document<any, any, Item> & Item & {
+	id?: Id,
+	_id: ObjectId
 }
 
 export interface ItemModel extends Model<ItemDocument> {
@@ -37,16 +29,12 @@ export interface Section {
 	name: string,
 	items: Id[],
 	pinned: boolean,
-	id: Id,
 	user: Id
 }
 
-export interface SectionDocument extends Document<Section> {
-	name: string,
-	items: Id[],
-	pinned: boolean,
-	id: Id,
-	user: Id
+export type SectionDocument = Document<any, any, Section> & Section & {
+	id?: Id,
+	_id: ObjectId
 }
 
 export interface SectionModel extends Model<SectionDocument> {
@@ -60,15 +48,12 @@ export interface PopulatedSectionDocument extends Omit<SectionDocument, "items" 
 export interface User {
 	name: Name,
 	sections: Id[],
-	id: Id,
 	photo_url: AvatarUrl | null
 }
 
-export interface UserDocument extends Document<User> {
-	name: Name,
-	sections: Id[],
-	id: Id,
-	photo_url: AvatarUrl | null
+export type UserDocument = Document<any, any, User> & User & {
+	id?: Id,
+	_id: ObjectId
 }
 
 export interface UserModel extends Model<UserDocument> {
