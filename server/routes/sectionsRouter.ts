@@ -1,9 +1,8 @@
 import { FastifyPluginCallback } from "fastify";
-import { Deleted, Section } from '../types';
+import { Deleted, Id, Item, Section } from '../types';
 import { STATUS_CODES } from '../constants';
 import { UserModel, SectionModel, ItemModel } from '../database/models';
-import { populateItems } from '../database/population/sectionPopulation';
-import { populateSections } from '../database/population/userPopulation';
+import { populateItems, populateSections } from '../database/population';
 
 // ? Path: /items
 const sectionsRouter: FastifyPluginCallback<any, any> = (router, opts, done) => {
@@ -169,6 +168,30 @@ const sectionsRouter: FastifyPluginCallback<any, any> = (router, opts, done) => 
 
 		return { payload: section }
 	} )
+
+	router.post("/addItem", async (req, res) => {
+		const {to, item} = req.body as { to?: Id, item?: Item}
+
+		if (!to || !item) {
+			res.status(STATUS_CODES.BAD)
+			return {error: "You must pass both id and item to body"}
+		}
+
+		const newItem = await ItemModel.create(item);
+		await newItem.save();
+
+		const section = await SectionModel.findById(to);
+
+		if (!section) {
+			res.status(STATUS_CODES.BAD);
+			return {error: "Can't find section"}
+		}
+
+		section.items.push(newItem._id);
+		await section.save();
+
+		return {payload: newItem};
+	})
 
 	done();
 }
