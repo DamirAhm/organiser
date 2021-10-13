@@ -1,4 +1,3 @@
-import itemsRouter from './itemsRouter';
-import sectionsRouter from './sectionsRouter';
-
-export { itemsRouter, sectionsRouter };
+export * from './itemsRouter';
+export * from './sectionsRouter';
+export * from './usersRouter'

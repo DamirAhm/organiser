@@ -5,7 +5,7 @@ import { UserModel, SectionModel, ItemModel } from '../database/models';
 import { populateItems, populateSections } from '../database/population';
 
 // ? Path: /items
-const sectionsRouter: FastifyPluginCallback<any, any> = (router, opts, done) => {
+export const sectionsRouter: FastifyPluginCallback<any, any> = (router, opts, done) => {
 	router.post( '/', async (req, res) => {
 		const { name, user } = req.body as Partial<Section>;
 
@@ -195,5 +195,3 @@ const sectionsRouter: FastifyPluginCallback<any, any> = (router, opts, done) => 
 
 	done();
 }
-
-export default sectionsRouter

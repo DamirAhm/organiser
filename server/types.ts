@@ -12,7 +12,7 @@ export interface Item {
 }
 
 export type ItemDocument = Document<any, any, Item> & Item & {
-	id?: Id,
+	id?: string,
 	_id: ObjectId
 }
 
@@ -33,7 +33,7 @@ export interface Section {
 }
 
 export type SectionDocument = Document<any, any, Section> & Section & {
-	id?: Id,
+	id?: string,
 	_id: ObjectId
 }
 
@@ -52,7 +52,7 @@ export interface User {
 }
 
 export type UserDocument = Document<any, any, User> & User & {
-	id?: Id,
+	id?: string,
 	_id: ObjectId
 }
 
@@ -64,7 +64,7 @@ export interface PopulatedUser extends Omit<UserDocument, "sections"> {
 }
 
 export type Name = string;
-export type Id = string;
+export type Id = ObjectId;
 export type AvatarUrl = string
 
 export type Deleted = {

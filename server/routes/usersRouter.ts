@@ -5,7 +5,7 @@ import { UserModel, SectionModel } from '../database/models';
 import { populateSections } from '../database/population';
 
 // ? Path: /items
-const usersRouter: FastifyPluginCallback<any, any> = (router, opts, done) => {
+export const usersRouter: FastifyPluginCallback<any, any> = (router, opts, done) => {
 	router.post( '/', async (req, res) => {
 		const { name, photo_url } = req.body as Partial<User>;
 
@@ -17,13 +17,13 @@ const usersRouter: FastifyPluginCallback<any, any> = (router, opts, done) => {
 
 		const newUser = await UserModel.create( { name, photo_url } );
 		await newUser.save();
-		
+
 		return { payload: newUser }
 	} )
 
 	router.delete( '/', async (req, res) => {
 		const { id: userId } = req.body as { id: unknown };
-		
+
 		if ( !userId || typeof userId !== 'string' ) {
 			res.status( STATUS_CODES.BAD );
 
@@ -31,7 +31,7 @@ const usersRouter: FastifyPluginCallback<any, any> = (router, opts, done) => {
 		}
 
 		const UserToDelete = await UserModel.findByIdAndDelete( userId );
-		
+
 		if ( UserToDelete === null ) return {};
 
 		const deleted: Deleted = { users: [ UserToDelete.id ] };
@@ -129,5 +129,3 @@ const usersRouter: FastifyPluginCallback<any, any> = (router, opts, done) => {
 
 	done();
 }
-
-export default usersRouter

@@ -5,7 +5,7 @@ import { ItemModel, SectionModel } from '../database/models';
 import { populateItems, populateSubItems } from '../database/population';
 
 // ? Path: /items
-const itemsRouter: FastifyPluginCallback<any, any> = (router, opts, done) => {
+export const itemsRouter: FastifyPluginCallback<any, any> = (router, opts, done) => {
 	router.post( '/', async (req, res) => {
 		const { title, description, files, tags, parent, section } = req.body as Partial<Item>;
 
@@ -224,7 +224,7 @@ const itemsRouter: FastifyPluginCallback<any, any> = (router, opts, done) => {
 		const newItem = await ItemModel.create( newSubItem );
 		await newItem.save();
 
-		const parentItem = ItemModel.findById( to );
+		const parentItem = await ItemModel.findById( to );
 
 		if ( !parentItem ) {
 			res.status( STATUS_CODES.BAD );
@@ -239,5 +239,3 @@ const itemsRouter: FastifyPluginCallback<any, any> = (router, opts, done) => {
 
 	done();
 }
-
-export default itemsRouter
