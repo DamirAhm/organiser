@@ -8,3 +8,5 @@ export const STATUS_CODES = {
 	BAD: 400,
 	GOOD: 200
 }
+
+export const GOOGLE_AUTH_LINK = 'http://localhost:3000/google/callback';

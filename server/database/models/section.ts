@@ -1,7 +1,7 @@
-import { Section } from '../../types';
+import { Section, SectionDocument } from '../../types';
 import { model, Schema, SchemaTypes } from 'mongoose';
 
-const SectionSchema = new Schema<Section>( {
+const SectionSchema = new Schema<SectionDocument>( {
 	name: {
 		type: String,
 		required: true,

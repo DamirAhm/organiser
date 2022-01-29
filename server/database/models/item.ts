@@ -1,7 +1,7 @@
-import { Item } from "../../types";
+import { Item, ItemDocument } from "../../types";
 import { model, Schema, SchemaTypes } from 'mongoose';
 
-const ItemSchema = new Schema<Item>( {
+const ItemSchema = new Schema<ItemDocument>( {
 	files: {
 		type: [ String ],
 		default: [],

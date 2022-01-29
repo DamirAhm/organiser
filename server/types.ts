@@ -46,14 +46,34 @@ export interface PopulatedSectionDocument extends Omit<SectionDocument, "items" 
 }
 
 export interface User {
+	email: string,
 	name: Name,
 	sections: Id[],
-	photo_url: AvatarUrl | null
+	photo_url: AvatarUrl | null,
+	hash?: string,
+	salt?: string,
+	googleId?: string
+}
+
+export interface RegisterUser extends User {
+	password: string
 }
 
 export type UserDocument = Document<any, any, User> & User & {
 	id?: string,
-	_id: ObjectId
+	_id: ObjectId,
+
+	setPassword(password: string): void,
+	validatePassword(password: string): boolean,
+	generateJWT(): string,
+	toAuthJSON(): authJSON
+}
+
+export type authJSON = {
+	_id: Id,
+	email: string,
+	name: string,
+	token: string
 }
 
 export interface UserModel extends Model<UserDocument> {
