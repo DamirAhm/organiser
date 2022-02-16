@@ -6,7 +6,7 @@ import expressSession from 'express-session';
 import cookieParser from 'cookie-parser';
 import { itemsRouter } from './routes/itemsRouter';
 import { sectionsRouter } from './routes/sectionsRouter';
-import { usersRouter } from './routes/usersRouter';
+import { userRouter } from './routes/userRouter';
 import passport from 'passport';
 
 import './passport';
@@ -35,7 +35,7 @@ export const app = express();
 
 		app.use('/items', itemsRouter);
 		app.use('/sections', sectionsRouter);
-		app.use('/users', usersRouter);
+		app.use('/user', userRouter);
 		app.use('/google', googleAuthRouter);
 
 		app.get(
