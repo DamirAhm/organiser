@@ -1,7 +1,7 @@
 import { Section, SectionDocument } from '../../types';
 import { model, Schema, SchemaTypes } from 'mongoose';
 
-const SectionSchema = new Schema<SectionDocument>( {
+const SectionSchema = new Schema<SectionDocument>({
 	name: {
 		type: String,
 		required: true,
@@ -12,15 +12,15 @@ const SectionSchema = new Schema<SectionDocument>( {
 	},
 	user: {
 		type: SchemaTypes.ObjectId,
-		ref: "User",
+		ref: 'User',
 		required: true,
 	},
 	items: {
 		type: [SchemaTypes.ObjectId],
-		ref: "Item",
-		default: []
+		ref: 'Item',
+		default: [],
 	},
-} );
+});
 
-const SectionModel = model( 'Section', SectionSchema );
+const SectionModel = model('Section', SectionSchema);
 export default SectionModel;

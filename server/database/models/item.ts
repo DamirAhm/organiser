@@ -1,14 +1,14 @@
-import { Item, ItemDocument } from "../../types";
+import { Item, ItemDocument } from '../../types';
 import { model, Schema, SchemaTypes } from 'mongoose';
 
-const ItemSchema = new Schema<ItemDocument>( {
+const ItemSchema = new Schema<ItemDocument>({
 	files: {
-		type: [ String ],
+		type: [String],
 		default: [],
 	},
 	subItems: {
-		type: [ SchemaTypes.ObjectId ],
-		ref: "Item",
+		type: [SchemaTypes.ObjectId],
+		ref: 'Item',
 		default: [],
 	},
 	title: {
@@ -20,7 +20,7 @@ const ItemSchema = new Schema<ItemDocument>( {
 		default: '',
 	},
 	tags: {
-		type: [ String ],
+		type: [String],
 		default: [],
 	},
 	pinned: {
@@ -29,15 +29,15 @@ const ItemSchema = new Schema<ItemDocument>( {
 	},
 	section: {
 		type: SchemaTypes.ObjectId,
-		ref: "Section",
-		default: null
+		ref: 'Section',
+		default: null,
 	},
 	parent: {
 		type: SchemaTypes.ObjectId,
-		ref: "Item",
-		default: null
+		ref: 'Item',
+		default: null,
 	},
-} );
+});
 
-const ItemModel = model( 'Item', ItemSchema );
+const ItemModel = model('Item', ItemSchema);
 export default ItemModel;

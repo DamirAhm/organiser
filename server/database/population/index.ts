@@ -1,3 +1,3 @@
-export * from "./itemPopulation"
-export * from "./sectionPopulation"
-export * from "./userPopulation"
+export * from './itemPopulation';
+export * from './sectionPopulation';
+export * from './userPopulation';
