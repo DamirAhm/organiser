@@ -1,4 +1,9 @@
-import { useNavigate, useParams, useMatch } from 'react-router-dom';
+import {
+	useNavigate,
+	useParams,
+	useMatch,
+	useLocation,
+} from 'react-router-dom';
 
 export type sectionId = string | null;
 
@@ -11,6 +16,7 @@ export const useOpenedSection = (): useOpenedSectionType => {
 	const navigate = useNavigate();
 
 	const match = useMatch('/:sectionId');
+
 	const openedSectionId = match?.params?.sectionId || null;
 
 	return {

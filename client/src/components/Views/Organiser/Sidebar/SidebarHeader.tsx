@@ -7,14 +7,14 @@ export const SidebarHeaderContainer = styled.header`
 	padding: 20px;
 	display: flex;
 	justify-content: space-between;
-	align-items: center;
+	align-notes: center;
 	box-shadow: 0px 1px 2px -1px black;
 	position: relative;
 `;
 
 const UserInfo = styled.div`
 	display: flex;
-	align-items: center;
+	align-notes: center;
 `;
 
 const UserName = styled.span`

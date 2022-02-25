@@ -4,7 +4,7 @@ import cors from 'cors';
 import express from 'express';
 import expressSession from 'express-session';
 import cookieParser from 'cookie-parser';
-import { itemsRouter } from './routes/itemsRouter';
+import { notesRouter } from './routes/notesRouter';
 import { sectionsRouter } from './routes/sectionsRouter';
 import { userRouter } from './routes/userRouter';
 import passport from 'passport';
@@ -33,7 +33,7 @@ export const app = express();
 		app.use(passport.initialize());
 		app.use(passport.session());
 
-		app.use('/items', itemsRouter);
+		app.use('/notes', notesRouter);
 		app.use('/sections', sectionsRouter);
 		app.use('/user', userRouter);
 		app.use('/google', googleAuthRouter);

@@ -1,5 +1,5 @@
-import ItemModel from './item';
+import NoteModel from './note';
 import SectionModel from './section';
 import UserModel from './user';
 
-export { ItemModel, SectionModel, UserModel };
+export { NoteModel, SectionModel, UserModel };

@@ -7,7 +7,7 @@ import Select from './Select';
 const FiltersContainer = styled.div`
 	display: flex;
 	justify-content: space-between;
-	align-items: center;
+	align-notes: center;
 	box-sizing: border-box;
 	width: 100%;
 

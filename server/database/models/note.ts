@@ -1,14 +1,14 @@
-import { Item, ItemDocument } from '../../types';
+import { Note, NoteDocument } from '../../types';
 import { model, Schema, SchemaTypes } from 'mongoose';
 
-const ItemSchema = new Schema<ItemDocument>({
+const NoteSchema = new Schema<NoteDocument>({
 	files: {
 		type: [String],
 		default: [],
 	},
-	subItems: {
+	subNotes: {
 		type: [SchemaTypes.ObjectId],
-		ref: 'Item',
+		ref: 'Note',
 		default: [],
 	},
 	title: {
@@ -34,10 +34,10 @@ const ItemSchema = new Schema<ItemDocument>({
 	},
 	parent: {
 		type: SchemaTypes.ObjectId,
-		ref: 'Item',
+		ref: 'Note',
 		default: null,
 	},
 });
 
-const ItemModel = model('Item', ItemSchema);
-export default ItemModel;
+const NoteModel = model('Note', NoteSchema);
+export default NoteModel;

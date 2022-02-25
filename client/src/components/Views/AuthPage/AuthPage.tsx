@@ -9,7 +9,7 @@ const AuthContainer = styled.div`
 	width: min(100%, 1400px);
 	min-height: 100%;
 	display: flex;
-	align-items: center;
+	align-notes: center;
 	justify-content: center;
 	flex-direction: column;
 	background-color: var(--background-color);

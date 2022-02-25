@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { GoPlus } from 'react-icons/go';
-import getItems, { GET_ITEMS } from '../../../../api/Queries/getItems';
+import getNotes, { GET_NOTES } from '../../../../api/Queries/getNotes';
 import { useQuery } from 'react-query';
 import { useOpenedSection } from '../../../../hooks/useOpenedSection';
 import useAuthToken from '../../../../hooks/useAuthToken';
@@ -19,7 +19,7 @@ const NotesContainer = styled.div`
 const AddButton = styled.button`
 	display: flex;
 	justify-content: space-between;
-	align-items: center;
+	align-notes: center;
 	padding: 10px 12px;
 	border-radius: 13px;
 	font-size: 1.1rem;
@@ -39,19 +39,19 @@ const AddButton = styled.button`
 	}
 `;
 
-const ItemsWrapper = styled.div`
+const NotesWrapper = styled.div`
 	height: 100%;
 `;
 
-const ItemElement = styled.div``;
+const NoteElement = styled.div``;
 
 type Props = {};
 
 const Notes: React.FC<Props> = ({}) => {
 	const { authToken } = useAuthToken();
 	const { openedSectionId } = useOpenedSection();
-	const { data } = useQuery(GET_ITEMS, () =>
-		getItems(authToken, openedSectionId!)
+	const { data } = useQuery(GET_NOTES, () =>
+		getNotes(authToken, openedSectionId!)
 	);
 
 	return (
@@ -61,11 +61,11 @@ const Notes: React.FC<Props> = ({}) => {
 			</AddButton>
 
 			{data && (
-				<ItemsWrapper>
+				<NotesWrapper>
 					{data.map(({ title }) => (
-						<ItemElement>{title}</ItemElement>
+						<NoteElement>{title}</NoteElement>
 					))}
-				</ItemsWrapper>
+				</NotesWrapper>
 			)}
 		</NotesContainer>
 	);

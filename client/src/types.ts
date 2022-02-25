@@ -26,17 +26,17 @@ export type Id = string;
 export type AvatarUrl = string;
 
 export type Deleted = {
-	items?: Id[];
+	notes?: Id[];
 	sections?: Id[];
 	users?: Id[];
 };
 
-export type Item =
+export type Note =
 	| {
 			files: string[];
 			title: string;
 			description: string;
-			subItems: Id[];
+			subNotes: Id[];
 			tags: string[];
 			pinned: boolean;
 			user: Id;
@@ -47,7 +47,7 @@ export type Item =
 			files: string[];
 			title: string;
 			description: string;
-			subItems: Id[];
+			subNotes: Id[];
 			tags: string[];
 			pinned: boolean;
 			id: string;
@@ -55,8 +55,8 @@ export type Item =
 			parent: Id | null;
 	  };
 
-export type NewItem = Omit<Item, 'files' | 'subItems' | 'pinned'>;
-export type ItemPreview = {
+export type NewNote = Omit<Note, 'files' | 'subNotes' | 'pinned'>;
+export type NotePreview = {
 	name: string;
 	id: string;
 	pinned: boolean;
@@ -64,12 +64,12 @@ export type ItemPreview = {
 
 export interface Section {
 	name: string;
-	items: string[];
+	notes: string[];
 	pinned: boolean;
 	user: string;
 	id: string;
 }
 
-export type SectionPreview = Omit<Section, 'items' | 'user'>;
+export type SectionPreview = Omit<Section, 'notes' | 'user'>;
 
 export type sectionsList = SectionPreview[];

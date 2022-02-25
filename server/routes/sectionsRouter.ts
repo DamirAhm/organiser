@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { ItemModel, SectionModel, UserModel } from '../database/models';
+import { NoteModel, SectionModel, UserModel } from '../database/models';
 import { authJSON, Section } from '../types';
-import { populateItems, populateSections } from '../database/population';
+import { populateNotes, populateSections } from '../database/population';
 import { STATUS_CODES } from '../constants';
 import auth from '../auth';
 import mongoose, { Condition } from 'mongoose';
@@ -80,9 +80,9 @@ sectionsRouter.delete('/:sectionId', auth.required, (req, res, next) => {
 				await user.save();
 			}
 
-			if (sectionToDelete.items.length !== 0) {
-				for (const itemId of sectionToDelete.items) {
-					await ItemModel.deleteOne({ _id: itemId });
+			if (sectionToDelete.notes.length !== 0) {
+				for (const noteId of sectionToDelete.notes) {
+					await NoteModel.deleteOne({ _id: noteId });
 				}
 			}
 
@@ -170,7 +170,7 @@ sectionsRouter.get('/:sectionId', auth.required, (req, res, next) => {
 
 				return res
 					.status(STATUS_CODES.GOOD)
-					.json({ payload: await populateItems(section) });
+					.json({ payload: await populateNotes(section) });
 			}
 
 			return res.json({ payload: null });
@@ -217,11 +217,11 @@ sectionsRouter.put('/:sectionId', auth.required, (req, res, next) => {
 					if (key === 'id' || key === '_id') {
 						return res
 							.status(STATUS_CODES.BAD)
-							.json({ error: 'You can`t change item`s id' });
-					} else if (key === 'items') {
+							.json({ error: 'You can`t change note`s id' });
+					} else if (key === 'notes') {
 						return res
 							.status(STATUS_CODES.BAD)
-							.json({ error: "You can't change items" });
+							.json({ error: "You can't change notes" });
 					} else if (key === 'user') {
 						return res.status(STATUS_CODES.BAD).json({
 							error: "You can't change section's owner",

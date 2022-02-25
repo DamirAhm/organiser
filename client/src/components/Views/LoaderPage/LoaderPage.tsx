@@ -15,7 +15,7 @@ const Wrapper = styled.div<{ imbedded: boolean }>`
 			`}
 	display: flex;
 	justify-content: center;
-	align-items: center;
+	align-notes: center;
 	background-color: var(--background-color);
 `;
 

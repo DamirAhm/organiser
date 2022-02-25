@@ -1,10 +1,10 @@
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
-const SectionNamingItemContainer = styled.label`
+const SectionNamingNoteContainer = styled.label`
 	padding: 20px;
 	display: grid;
-	align-items: start;
+	align-notes: start;
 	border-radius: 5px;
 	font-size: 1.5rem;
 	color: var(--bold-text-color);
@@ -32,7 +32,7 @@ type Props = {
 	defaultValue?: string;
 };
 
-const SectionNamingItem: React.FC<Props> = ({
+const SectionNamingNote: React.FC<Props> = ({
 	onSubmit,
 	defaultValue = '',
 }) => {
@@ -48,7 +48,7 @@ const SectionNamingItem: React.FC<Props> = ({
 	);
 
 	return (
-		<SectionNamingItemContainer
+		<SectionNamingNoteContainer
 			onClick={(e: React.MouseEvent) => e.stopPropagation()}
 		>
 			<form onSubmit={handleEnterPress}>
@@ -60,8 +60,8 @@ const SectionNamingItem: React.FC<Props> = ({
 					onChange={(e) => setName(e.target.value)}
 				/>
 			</form>
-		</SectionNamingItemContainer>
+		</SectionNamingNoteContainer>
 	);
 };
 
-export default SectionNamingItem;
+export default SectionNamingNote;
