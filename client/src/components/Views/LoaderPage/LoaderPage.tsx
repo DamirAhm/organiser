@@ -5,11 +5,15 @@ import Loader from '../../Common/Loader';
 const Wrapper = styled.div<{ imbedded: boolean }>`
 	${({ imbedded }) =>
 		imbedded
-			? `width: 100%;`
-			: `width: min(100vw, var(--container-width));`}
-	height: 100vh;
+			? `
+				width: 100%;
+				height: 100%;
+			`
+			: `
+				width: min(100vw, var(--container-width));
+				height: 100vh;
+			`}
 	display: flex;
-	grid-column: 2;
 	justify-content: center;
 	align-items: center;
 	background-color: var(--background-color);

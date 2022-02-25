@@ -13,12 +13,3 @@ const AuthContext = React.createContext<{
 
 export default AuthContext;
 export const AuthContextProvider = AuthContext.Provider;
-export const useAuthToken = () => {
-	const { authToken, setAuthToken } = useContext(AuthContext);
-
-	return {
-		authToken,
-		setAuthToken,
-		authorized: authToken !== null,
-	};
-};

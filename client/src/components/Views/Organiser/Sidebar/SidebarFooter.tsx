@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { GoPencil, GoTrashcan } from 'react-icons/go';
 import { useMutation, useQueryClient } from 'react-query';
 import styled from 'styled-components';
-import { useAuthToken } from '../../../../Contexts/AuthContext';
+import useAuthToken from '../../../../hooks/useAuthToken';
 import { useOpenedSection } from '../../../../hooks/useOpenedSection';
 import deleteSectionMutation, {
 	deleteSectionType,

@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { Suspense, useState } from 'react';
 import { useQuery } from 'react-query';
 import styled from 'styled-components';
-import { useAuthToken } from '../../../../Contexts/AuthContext';
+import useAuthToken from '../../../../hooks/useAuthToken';
 import { useOpenedSection } from '../../../../hooks/useOpenedSection';
 import getSection, { GET_SECTION } from '../../../../api/Queries/getSection';
 import Filters from '../../../Common/Filters';
 import Notes from './Notes';
+import { LoaderPage } from '../../LoaderPage';
 
 type Props = {};
 
@@ -51,7 +52,9 @@ const NotesSection: React.FC<Props> = ({}) => {
 						sortsList={options}
 						defaultSort={sortedBy}
 					/>
-					<Notes />
+					<Suspense fallback={<LoaderPage imbedded />}>
+						<Notes />
+					</Suspense>
 				</>
 			)}
 		</ContentContainer>

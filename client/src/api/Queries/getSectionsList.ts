@@ -6,7 +6,7 @@ import { sectionsList } from '../../types';
 export const GET_SECTIONS_LIST = 'getSectionsList';
 
 export type getSectionsListType = sectionsList;
-type getSectionsListDataType = { payload: sectionsList };
+type getSectionsListDataType = { payload: getSectionsListType };
 
 export default async function getSectionsList(
 	authToken: string | null

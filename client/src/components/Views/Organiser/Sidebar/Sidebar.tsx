@@ -6,7 +6,7 @@ import getUser, {
 	getUserType,
 	GET_USER,
 } from '../../../../api/Queries/getUser';
-import { useAuthToken } from '../../../../Contexts/AuthContext';
+import useAuthToken from '../../../../hooks/useAuthToken';
 import Loader from '../../../Common/Loader';
 import SidebarHeader, { SidebarHeaderContainer } from './SidebarHeader';
 import SectionsList from './SectionsList';

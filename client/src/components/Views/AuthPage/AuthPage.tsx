@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { SERVER_URL } from '../../../constants';
 import styled from 'styled-components';
-import { useAuthToken } from '../../../Contexts/AuthContext';
+import useAuthToken from '../../../hooks/useAuthToken';
 import { useNavigate } from 'react-router-dom';
 import { FcGoogle } from 'react-icons/fc';
 

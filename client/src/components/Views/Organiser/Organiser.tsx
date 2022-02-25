@@ -29,12 +29,24 @@ export const ContentPlaceholder = styled.section`
 	background-color: var(--background-color);
 `;
 
+export const LoaderPageWrapper = styled.div`
+	width: 100%;
+	heigth: 100%;
+	grid-column: 2;
+`;
+
 const Organiser: React.FC = () => {
 	return (
 		<View>
 			<Container>
 				<Sidebar />
-				<Suspense fallback={<LoaderPage imbedded />}>
+				<Suspense
+					fallback={
+						<LoaderPageWrapper>
+							<LoaderPage imbedded />
+						</LoaderPageWrapper>
+					}
+				>
 					<Routes>
 						<Route path=':sectionId' element={<NotesSection />} />
 						<Route path='' element={<ContentPlaceholder />} />

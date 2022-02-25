@@ -2,7 +2,7 @@ import React, { useCallback, useState } from 'react';
 import { useQueryClient } from 'react-query';
 import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
-import { useAuthToken } from '../../../../Contexts/AuthContext';
+import useAuthToken from '../../../../hooks/useAuthToken';
 import getSection, { GET_SECTION } from '../../../../api/Queries/getSection';
 import { SectionPreview } from '../../../../types';
 

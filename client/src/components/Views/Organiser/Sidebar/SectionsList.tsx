@@ -1,7 +1,7 @@
 import React, { Fragment, SetStateAction, useCallback, useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import styled from 'styled-components';
-import { useAuthToken } from '../../../../Contexts/AuthContext';
+import useAuthToken from '../../../../hooks/useAuthToken';
 import { useOpenedSection } from '../../../../hooks/useOpenedSection';
 import createSection, {
 	createSectionType,
