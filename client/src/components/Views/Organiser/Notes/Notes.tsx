@@ -1,6 +1,10 @@
 import React from 'react';
 import styled from 'styled-components';
 import { GoPlus } from 'react-icons/go';
+import getItems, { GET_ITEMS } from '../../../../api/Queries/getItems';
+import { useQuery } from 'react-query';
+import { useOpenedSection } from '../../../../hooks/useOpenedSection';
+import useAuthToken from '../../../../hooks/useAuthToken';
 
 const NotesContainer = styled.div`
 	background-color: #eef;
@@ -35,14 +39,34 @@ const AddButton = styled.button`
 	}
 `;
 
+const ItemsWrapper = styled.div`
+	height: 100%;
+`;
+
+const ItemElement = styled.div``;
+
 type Props = {};
 
 const Notes: React.FC<Props> = ({}) => {
+	const { authToken } = useAuthToken();
+	const { openedSectionId } = useOpenedSection();
+	const { data } = useQuery(GET_ITEMS, () =>
+		getItems(authToken, openedSectionId!)
+	);
+
 	return (
 		<NotesContainer>
 			<AddButton>
 				Создать <GoPlus color='var(--border-color)' size={20} />
 			</AddButton>
+
+			{data && (
+				<ItemsWrapper>
+					{data.map(({ title }) => (
+						<ItemElement>{title}</ItemElement>
+					))}
+				</ItemsWrapper>
+			)}
 		</NotesContainer>
 	);
 };
