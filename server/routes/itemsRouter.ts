@@ -162,7 +162,7 @@ itemsRouter.get('/', auth.required, (req, res, next) => {
 			} else if (parentSection !== null) {
 				const populatedSection = await populateItems(parentSection);
 
-				res.json({ payload: populatedSection.items });
+				return res.json({ payload: populatedSection.items });
 			}
 
 			return res.json({ payload: null });
