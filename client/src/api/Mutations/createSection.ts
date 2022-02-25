@@ -6,13 +6,15 @@ import headersWithAuth from '../../utils/headersWithAuth';
 export type createSectionType = SectionPreview | null;
 type createSectionDataType = { payload: createSectionType };
 
+export type createSectionArgs = {
+	authToken: string | null;
+	name: string;
+};
+
 export default async function createSection({
 	authToken,
 	name,
-}: {
-	authToken: string | null;
-	name: string;
-}): Promise<createSectionType> {
+}: createSectionArgs): Promise<createSectionType> {
 	const data = await axios
 		.post<createSectionDataType>(
 			`${SERVER_URL}/sections`,

@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import useAuthToken from '../../../../hooks/useAuthToken';
 import { useOpenedSection } from '../../../../hooks/useOpenedSection';
 import createSection, {
+	createSectionArgs,
 	createSectionType,
 } from '../../../../api/Mutations/createSection';
 import getSectionsList, {
@@ -14,6 +15,7 @@ import { SectionPreview } from '../../../../types';
 import SectionNote from './SectionItem';
 import SectionNamingNote from './SectionNamingItem';
 import renameSection, {
+	renameSectionArgs,
 	renameSectionType,
 } from '../../../../api/Mutations/renameSection';
 
@@ -52,7 +54,7 @@ const SectionsList: React.FC<Props> = ({
 	const { mutateAsync: createAsync } = useMutation<
 		createSectionType,
 		{},
-		{ authToken: string | null; name: string }
+		createSectionArgs
 	>(createSection, {
 		onMutate: ({ name }) => {
 			queryClient.cancelQueries(GET_SECTIONS_LIST);
@@ -82,7 +84,7 @@ const SectionsList: React.FC<Props> = ({
 	const { mutateAsync: renameAsync } = useMutation<
 		renameSectionType,
 		{},
-		{ authToken: string | null; sectionId: string; name: string }
+		renameSectionArgs
 	>(renameSection, {
 		onMutate: ({ sectionId, name }) => {
 			queryClient.cancelQueries(GET_SECTIONS_LIST);

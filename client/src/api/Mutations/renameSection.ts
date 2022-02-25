@@ -6,15 +6,17 @@ import headersWithAuth from '../../utils/headersWithAuth';
 export type renameSectionType = SectionPreview | null;
 type renameSectionDataType = { payload: SectionPreview | null };
 
+export type renameSectionArgs = {
+	authToken: string | null;
+	sectionId: string;
+	name: string;
+};
+
 export default async function renameSection({
 	authToken,
 	sectionId,
 	name,
-}: {
-	authToken: string | null;
-	sectionId: string;
-	name: string;
-}): Promise<renameSectionType> {
+}: renameSectionArgs): Promise<renameSectionType> {
 	const data = await axios
 		.put<renameSectionDataType>(
 			`${SERVER_URL}/sections/${sectionId}`,

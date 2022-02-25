@@ -6,13 +6,15 @@ import headersWithAuth from '../../utils/headersWithAuth';
 export type deleteSectionType = SectionPreview | null;
 type deleteSectionDataType = { payload: deleteSectionType };
 
+export type deleteSectionArgs = {
+	authToken: string | null;
+	sectionId: string;
+};
+
 export default async function deleteSection({
 	authToken,
 	sectionId,
-}: {
-	authToken: string | null;
-	sectionId: string;
-}): Promise<deleteSectionType> {
+}: deleteSectionArgs): Promise<deleteSectionType> {
 	const data = await axios
 		.delete<deleteSectionDataType>(
 			`${SERVER_URL}/sections/${sectionId}`,

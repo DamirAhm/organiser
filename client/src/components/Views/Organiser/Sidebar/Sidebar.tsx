@@ -43,8 +43,6 @@ const Sidebar: React.FC<Props> = ({}) => {
 	const [editableSection, setEditableSection] = useState<string | null>(null);
 
 	const startCreating = useCallback(() => {
-		console.log('stpo');
-
 		stopEditing();
 		setIsCreating(true);
 	}, [setIsCreating]);

@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import useAuthToken from '../../../../hooks/useAuthToken';
 import { useOpenedSection } from '../../../../hooks/useOpenedSection';
 import deleteSectionMutation, {
+	deleteSectionArgs,
 	deleteSectionType,
 } from '../../../../api/Mutations/deleteSection';
 import {
@@ -77,7 +78,7 @@ const SidebarFooter: React.FC<Props> = ({
 	const { mutateAsync: deleteAsync } = useMutation<
 		deleteSectionType,
 		{},
-		{ authToken: string | null; sectionId: string }
+		deleteSectionArgs
 	>(deleteSectionMutation, {
 		onMutate: ({ sectionId }) => {
 			queryClient.cancelQueries(GET_SECTIONS_LIST);
