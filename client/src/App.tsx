@@ -1,12 +1,89 @@
-import React from 'react';
-import './App.css';
+import { Suspense, lazy, useEffect, useState } from 'react';
+import { Route, Routes, useNavigate, useSearchParams } from 'react-router-dom';
+import { useQuery, useQueryClient } from 'react-query';
+import styled from 'styled-components';
+
+import getAuthorized, { GET_AUTHORIZED } from './api/Queries/getAuthorized';
+import { AuthContextProvider, authToken } from './Contexts/AuthContext';
+import { LoaderPage } from './components/Views/LoaderPage';
+import getUser, { GET_USER } from './api/Queries/getUser';
+import getSection, { GET_SECTION } from './api/Queries/getSection';
+import getSectionsList, {
+	GET_SECTIONS_LIST,
+} from './api/Queries/getSectionsList';
+import { sectionId } from './hooks/useOpenedSection';
+
+const Auth = lazy(() => import('./components/Views/AuthPage'));
+const Organiser = lazy(() => import('./components/Views/Organiser'));
+
+const AppWrapper = styled.div`
+	width: 100%;
+	min-height: 100vh;
+	display: flex;
+	justify-content: center;
+`;
 
 function App() {
-  return (
-    <div className="App">
+	const [urlSearchParams] = useSearchParams();
+	const queryClient = useQueryClient();
+	const hasAuth = urlSearchParams.has('auth');
 
-    </div>
-  );
+	const [authToken, setAuthToken] = useState<authToken>(
+		import.meta.env.VITE_AUTH_TOKEN ?? null
+	);
+
+	const { isLoading, data: authorized } = useQuery<
+		boolean,
+		{ status: number }
+	>(GET_AUTHORIZED, () => getAuthorized(authToken), {
+		staleTime: Infinity,
+	});
+
+	const navigate = useNavigate();
+
+	useEffect(() => {
+		if (hasAuth && import.meta.env.DEV) {
+			setAuthToken(urlSearchParams.get('auth'));
+			queryClient.prefetchQuery({
+				queryKey: GET_USER,
+				queryFn: () => getUser(authToken),
+			});
+			queryClient.prefetchQuery({
+				queryKey: GET_SECTIONS_LIST,
+				queryFn: () => getSectionsList(authToken),
+			});
+		}
+	}, [hasAuth]);
+
+	useEffect(() => {
+		if (!isLoading) {
+			if (!authorized) navigate('/auth');
+		}
+	}, [authorized, isLoading]);
+
+	return (
+		<AuthContextProvider
+			value={{
+				authToken,
+				setAuthToken,
+			}}
+		>
+			<AppWrapper className='App'>
+				{isLoading ? (
+					<div className='loader'>
+						<LoaderPage />
+					</div>
+				) : (
+					<Suspense fallback={<LoaderPage />}>
+						<Routes>
+							<Route path='/auth' element={<Auth />} />
+							<Route path='/*' element={<Organiser />} />
+						</Routes>
+					</Suspense>
+				)}
+			</AppWrapper>
+		</AuthContextProvider>
+	);
 }
 
 export default App;
