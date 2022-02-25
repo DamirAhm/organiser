@@ -1,15 +1,33 @@
 import { ObjectId, Document, Model } from 'mongoose';
 
-export interface Item {
-	files: string[];
-	title: string;
-	description: string;
-	subItems: Id[];
-	tags: string[];
+export type Item =
+	| {
+			files: string[];
+			title: string;
+			description: string;
+			subItems: Id[];
+			tags: string[];
+			pinned: boolean;
+			user: Id;
+			section: Id | null;
+	  }
+	| {
+			files: string[];
+			title: string;
+			description: string;
+			subItems: Id[];
+			tags: string[];
+			pinned: boolean;
+			user: Id;
+			parent: Id | null;
+	  };
+
+export type NewItem = Omit<Item, 'files' | 'subItems' | 'pinned'>;
+export type ItemPreview = {
+	name: string;
+	id: string;
 	pinned: boolean;
-	parent: Id | null;
-	section: Id | null;
-}
+};
 
 export type ItemDocument = Document<any, any, Item> &
 	Item & {
@@ -73,7 +91,7 @@ export type UserDocument = Document<any, any, User> &
 	};
 
 export type authJSON = {
-	id: Id;
+	id: string;
 	email: string;
 	name: string;
 };
@@ -91,5 +109,4 @@ export type AvatarUrl = string;
 export type Deleted = {
 	items?: Id[];
 	sections?: Id[];
-	users?: Id[];
 };
