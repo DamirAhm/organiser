@@ -9,6 +9,7 @@ export type Item =
 			tags: string[];
 			pinned: boolean;
 			user: Id;
+			parent: undefined;
 			section: Id | null;
 	  }
 	| {
@@ -20,6 +21,7 @@ export type Item =
 			pinned: boolean;
 			user: Id;
 			parent: Id | null;
+			section: undefined;
 	  };
 
 export type NewItem = Omit<Item, 'files' | 'subItems' | 'pinned'>;
