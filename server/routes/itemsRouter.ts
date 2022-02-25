@@ -1,3 +1,4 @@
+import { NewItem } from './../types';
 import { Router } from 'express';
 import { ItemModel, SectionModel } from '../database/models';
 import { Deleted, Id, Item } from '../types';
@@ -7,11 +8,13 @@ import auth from '../auth';
 
 export const itemsRouter = Router();
 
-itemsRouter.post('/', auth.required, (req, res) => {
+itemsRouter.post('/', auth.required, (req, res, next) => {
 	(async () => {
 		try {
-			const { title, description, files, tags, parent, section } =
-				req.body as Partial<Item>;
+			const { title, description, tags, parent, section } =
+				req.body as NewItem;
+			//@ts-ignore
+			const { id: userId } = req.payload as authJSON;
 
 			if (!title) {
 				return res
@@ -26,10 +29,11 @@ itemsRouter.post('/', auth.required, (req, res) => {
 			const newItem = await ItemModel.create({
 				title,
 				description,
-				files,
 				tags,
 				parent,
 				section,
+				//@ts-ignore
+				user: req.payload.id,
 			});
 			await newItem.save();
 
@@ -40,6 +44,8 @@ itemsRouter.post('/', auth.required, (req, res) => {
 					return res
 						.status(STATUS_CODES.BAD)
 						.json({ error: "Can't find parent" });
+				} else if (parentItem.user.toString() !== userId) {
+					return res.status(403).send({ error: 'Unauthorized' });
 				}
 
 				parentItem.subItems.push(newItem.id);
@@ -52,6 +58,8 @@ itemsRouter.post('/', auth.required, (req, res) => {
 					return res
 						.status(STATUS_CODES.BAD)
 						.json({ error: "Can't find section" });
+				} else if (parentSection.user.toString() !== userId) {
+					return res.status(403).send({ error: 'Unauthorized' });
 				}
 
 				parentSection.items.push(newItem.id);
@@ -62,28 +70,30 @@ itemsRouter.post('/', auth.required, (req, res) => {
 		} catch (e) {
 			if (e instanceof Error) {
 				res.status(STATUS_CODES.BAD).json({ error: e.message });
-				throw e;
+				next(e);
 			}
 			console.log(e);
 		}
 	})();
 });
 
-itemsRouter.delete('/', auth.required, (req, res) => {
+itemsRouter.delete('/:itemId', auth.required, (req, res, next) => {
 	(async () => {
 		try {
-			const { id: itemId } = req.body as { id: unknown };
+			const { itemId } = req.params as { itemId: string };
+			//@ts-ignore
+			const { id: userId } = req.payload as authJSON;
 
-			if (!itemId || typeof itemId !== 'string') {
-				return res
-					.status(STATUS_CODES.BAD)
-					.json({ error: 'You must pass id with type string' });
-			}
-
-			const itemToDelete = await ItemModel.findByIdAndDelete(itemId);
+			const itemToDelete = await ItemModel.findById(itemId);
 
 			if (itemToDelete === null) return res.json({});
-			const deleted: Deleted = { items: [itemToDelete.id] };
+
+			const { title, id } = itemToDelete;
+
+			//@ts-ignore
+			if (itemToDelete.user.toString() !== userId) {
+				return res.status(403).send({ error: 'Unauthorized' });
+			}
 
 			if (itemToDelete.parent !== null) {
 				const parentItem = await ItemModel.findById(
@@ -112,64 +122,80 @@ itemsRouter.delete('/', auth.required, (req, res) => {
 			if (itemToDelete.subItems.length !== 0) {
 				for (const subItemId of itemToDelete.subItems) {
 					await ItemModel.deleteOne({ _id: subItemId });
-					deleted.items?.push(subItemId);
 				}
 			}
 
-			res.json({ payload: deleted });
+			await itemToDelete.delete();
+
+			res.json({ payload: { id, title } });
 		} catch (e) {
 			if (e instanceof Error) {
 				res.status(STATUS_CODES.BAD).json({ error: e.message });
-				throw e;
+				next(e);
 			} else {
-				console.log(e);
+				next(e);
 			}
 		}
 	})();
 });
 
-itemsRouter.get('/', auth.required, (req, res) => {
+itemsRouter.get('/', auth.required, (req, res, next) => {
 	(async () => {
 		try {
-			const { id: itemId, sectionId } = req.query as {
-				id: unknown;
-				sectionId: unknown;
+			const { sectionId } = req.query as {
+				sectionId: string;
 			};
+			//@ts-ignore
+			const { id: userId } = req.payload as authJSON;
 
-			if (!itemId && !sectionId) {
-				return res
-					.status(STATUS_CODES.BAD)
-					.json({ error: 'You must pass any of id or sectionId' });
-			} else if (itemId && sectionId) {
+			if (!sectionId) {
 				return res.status(STATUS_CODES.BAD).json({
-					error: 'You can`t pass both id and sectionId params, pass one at a time',
+					error: 'You must pass sectionId into query string',
 				});
-			} else if (itemId) {
-				const item = await ItemModel.findById(itemId);
-
-				if (item !== null) {
-					return res.json({ payload: await populateSubItems(item) });
-				}
-
-				return res.json({ payload: null });
-			} else if (sectionId) {
-				//TODO check if user owns section or not
-				const parentSection = await SectionModel.findById(sectionId);
-
-				if (parentSection !== null) {
-					const populatedSection = await populateItems(parentSection);
-
-					res.json({ payload: populatedSection.items });
-				}
-
-				return res.json({ payload: null });
-			} else {
-				throw new Error('Unknown error at items router');
 			}
+
+			const parentSection = await SectionModel.findById(sectionId);
+
+			//@ts-ignore
+			if (parentSection.user.toString() !== userId) {
+				return res.status(403).send({ error: 'Unauthorized' });
+			} else if (parentSection !== null) {
+				const populatedSection = await populateItems(parentSection);
+
+				res.json({ payload: populatedSection.items });
+			}
+
+			return res.json({ payload: null });
+		} catch (e) {
+			if (e instanceof Error) {
+				res.status(STATUS_CODES.BAD).send({ error: e.message });
+				next(e);
+			} else {
+				next(e);
+			}
+		}
+	})();
+});
+
+itemsRouter.get('/:itemId', auth.required, (req, res, next) => {
+	(async () => {
+		try {
+			const { itemId } = req.params as { itemId: string };
+			//@ts-ignore
+			const { id: userId } = req.payload as authJSON;
+
+			const item = await ItemModel.findById(itemId);
+
+			if (item !== null) {
+				if (item.user.toString() !== userId)
+					return res.json({ payload: await populateSubItems(item) });
+			}
+
+			return res.json({ payload: null });
 		} catch (e) {
 			if (e instanceof Error) {
 				res.status(STATUS_CODES.BAD).json({ error: e.message });
-				throw e;
+				next(e);
 			} else {
 				console.log(e);
 			}
@@ -177,10 +203,12 @@ itemsRouter.get('/', auth.required, (req, res) => {
 	})();
 });
 
-itemsRouter.put('/:id', auth.required, (req, res) => {
+itemsRouter.put('/:itemId', auth.required, (req, res, next) => {
 	(async () => {
 		try {
-			const { id: itemId } = req.params as { id: string };
+			const { itemId } = req.params as { itemId: string };
+			//@ts-ignore
+			const { id: userId } = req.payload as authJSON;
 
 			const item = await ItemModel.findById(itemId);
 
@@ -188,6 +216,8 @@ itemsRouter.put('/:id', auth.required, (req, res) => {
 				return res
 					.status(STATUS_CODES.BAD)
 					.json({ error: 'Can`t find item' });
+			} else if (item.user.toString() !== userId) {
+				return res.status(403).send({ error: 'Unauthorized' });
 			}
 
 			const { update } = req.body as { update: Partial<Item> | null };
@@ -272,7 +302,7 @@ itemsRouter.put('/:id', auth.required, (req, res) => {
 		} catch (e) {
 			if (e instanceof Error) {
 				res.status(STATUS_CODES.BAD).json({ error: e.message });
-				throw e;
+				next(e);
 			} else {
 				console.log(e);
 			}
@@ -280,13 +310,15 @@ itemsRouter.put('/:id', auth.required, (req, res) => {
 	})();
 });
 
-itemsRouter.post('/addSubItem', auth.required, (req, res) => {
+itemsRouter.post('/addSubItem', auth.required, (req, res, next) => {
 	(async () => {
 		try {
 			const { to, item: newSubItem } = req.body as {
 				to?: Id;
-				item?: Item;
+				item?: NewItem;
 			};
+			//@ts-ignore
+			const { id: userId } = req.payload as authJSON;
 
 			if (!to || !newSubItem) {
 				return res
@@ -294,16 +326,20 @@ itemsRouter.post('/addSubItem', auth.required, (req, res) => {
 					.json({ error: 'You must pass both id and item to body' });
 			}
 
-			const newItem = await ItemModel.create(newSubItem);
-			await newItem.save();
-
 			const parentItem = await ItemModel.findById(to);
 
 			if (!parentItem) {
 				return res
 					.status(STATUS_CODES.BAD)
 					.json({ error: "Can't find parent item" });
+			} else if (parentItem.user !== userId) {
+				return res.status(403).send({ error: 'Unauthorized' });
 			}
+			const newItem = await ItemModel.create({
+				...newSubItem,
+				user: userId,
+			});
+			await newItem.save();
 
 			parentItem.subItems.push(newItem._id);
 			await parentItem.save();
@@ -312,7 +348,7 @@ itemsRouter.post('/addSubItem', auth.required, (req, res) => {
 		} catch (e) {
 			if (e instanceof Error) {
 				res.status(STATUS_CODES.BAD).json({ error: e.message });
-				throw e;
+				next(e);
 			} else {
 				console.log(e);
 			}

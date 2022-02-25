@@ -11,7 +11,7 @@ userRouter.get('/authorized', auth.optional, (req, res) => {
 	res.send({ authorized: (req as any).payload != undefined ? true : false });
 });
 
-userRouter.put('/', auth.required, (req, res) => {
+userRouter.put('/', auth.required, (req, res, next) => {
 	(async () => {
 		try {
 			//@ts-ignore
@@ -56,7 +56,7 @@ userRouter.put('/', auth.required, (req, res) => {
 		} catch (e) {
 			if (e instanceof Error) {
 				res.status(STATUS_CODES.BAD).json({ error: e.message });
-				throw e;
+				next(e);
 			} else {
 				console.log(e);
 			}
@@ -64,7 +64,7 @@ userRouter.put('/', auth.required, (req, res) => {
 	})();
 });
 
-userRouter.get('/', auth.required, (req, res) => {
+userRouter.get('/', auth.required, (req, res, next) => {
 	(async () => {
 		try {
 			//@ts-ignore
@@ -72,47 +72,10 @@ userRouter.get('/', auth.required, (req, res) => {
 
 			const user = await UserModel.findById(id);
 
-			res.send(user);
+			res.send({ payload: user });
 		} catch (e) {
 			console.log(e);
-			throw e;
-		}
-	})();
-});
-
-userRouter.get('/shorten', auth.required, (req, res) => {
-	//@ts-ignore
-	const shortenUser = req.payload;
-
-	if (!shortenUser) {
-		res.statusCode = 401;
-		res.send({ error: "Can't get user information from token" });
-
-		return;
-	}
-
-	res.send(shortenUser);
-});
-
-userRouter.get('/photo', auth.required, (req, res) => {
-	(async () => {
-		try {
-			//@ts-ignore
-			const { id } = req.payload as authJSON;
-
-			const user = await UserModel.findById(id);
-
-			if (!user) {
-				res.statusCode = 401;
-				res.send({ error: "Can't find user" });
-
-				return;
-			}
-
-			res.send({ photo: user?.photo_url });
-		} catch (e) {
-			console.log(e);
-			throw e;
+			next(e);
 		}
 	})();
 });

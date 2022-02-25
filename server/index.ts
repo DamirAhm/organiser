@@ -24,7 +24,7 @@ export const app = express();
 		app.use(express.json());
 		app.use(
 			expressSession({
-				secret: process.env.SECRET as string,
+				secret: process.env.SECRET!,
 				resave: false,
 				saveUninitialized: false,
 			})
@@ -38,18 +38,13 @@ export const app = express();
 		app.use('/user', userRouter);
 		app.use('/google', googleAuthRouter);
 
-		app.get(
-			'/',
-			passport.authenticate('google', { scope: ['profile', 'email'] }),
-			(req, res) => {
-				res.send(req.user);
-			}
-		);
+		app.get('/*', (req, res) => {
+			console.log('Error', req);
+		});
 
 		const PORT = process.env.PORT ?? 8080;
 		app.listen(PORT, () => console.log(`Server is listening at ${PORT}`));
 	} catch (e) {
 		if (e instanceof Error) console.log('Unexpected error occurred', e);
-		throw e;
 	}
 })();
