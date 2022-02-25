@@ -1,10 +1,14 @@
 import React from 'react';
 import styled from 'styled-components';
 import { GoPlus } from 'react-icons/go';
-import getItems, { GET_ITEMS } from '../../../../api/Queries/getItems';
-import { useQuery } from 'react-query';
+import getNotes, { GET_NOTES } from '../../../../api/Queries/getNotes';
+import { useMutation, useQuery } from 'react-query';
 import { useOpenedSection } from '../../../../hooks/useOpenedSection';
 import useAuthToken from '../../../../hooks/useAuthToken';
+import {
+	createNoteArgs,
+	createNoteType,
+} from '../../../../api/Mutations/createNote';
 
 const NotesContainer = styled.div`
 	background-color: #eef;
@@ -39,20 +43,28 @@ const AddButton = styled.button`
 	}
 `;
 
-const ItemsWrapper = styled.div`
+const NotesWrapper = styled.div`
 	height: 100%;
 `;
 
-const ItemElement = styled.div``;
+const NoteElement = styled.div``;
 
 type Props = {};
 
 const Notes: React.FC<Props> = ({}) => {
 	const { authToken } = useAuthToken();
 	const { openedSectionId } = useOpenedSection();
-	const { data } = useQuery(GET_ITEMS, () =>
-		getItems(authToken, openedSectionId!)
+	const { data } = useQuery(GET_NOTES, () =>
+		getNotes(authToken, openedSectionId!)
 	);
+
+	const { mutateAsync: createNoteAsync } = useMutation<
+		createNoteType,
+		unknown,
+		createNoteArgs
+	>({
+		onMutate() {},
+	});
 
 	return (
 		<NotesContainer>
@@ -61,11 +73,11 @@ const Notes: React.FC<Props> = ({}) => {
 			</AddButton>
 
 			{data && (
-				<ItemsWrapper>
+				<NotesWrapper>
 					{data.map(({ title }) => (
-						<ItemElement>{title}</ItemElement>
+						<NoteElement>{title}</NoteElement>
 					))}
-				</ItemsWrapper>
+				</NotesWrapper>
 			)}
 		</NotesContainer>
 	);

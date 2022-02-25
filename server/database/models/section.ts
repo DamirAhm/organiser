@@ -15,9 +15,9 @@ const SectionSchema = new Schema<SectionDocument>({
 		ref: 'User',
 		required: true,
 	},
-	items: {
+	notes: {
 		type: [SchemaTypes.ObjectId],
-		ref: 'Item',
+		ref: 'Note',
 		default: [],
 	},
 });

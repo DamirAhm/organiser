@@ -6,7 +6,7 @@ import useAuthToken from '../../../../hooks/useAuthToken';
 import getSection, { GET_SECTION } from '../../../../api/Queries/getSection';
 import { SectionPreview } from '../../../../types';
 
-export const SectionItemContainer = styled.li<{ isActive: boolean }>`
+export const SectionNoteContainer = styled.li<{ isActive: boolean }>`
 	padding: 20px;
 	display: grid;
 	${({ isActive }) =>
@@ -38,7 +38,7 @@ const NavLinkStyled = styled(NavLink)`
 
 type Props = React.HTMLAttributes<HTMLAnchorElement> & SectionPreview;
 
-const SectionItem: React.FC<Props> = ({ name, id, pinned, ...rest }) => {
+const SectionNote: React.FC<Props> = ({ name, id, pinned, ...rest }) => {
 	const [prefetched, setPrefetched] = useState<boolean>(false);
 
 	const queryClient = useQueryClient();
@@ -58,16 +58,16 @@ const SectionItem: React.FC<Props> = ({ name, id, pinned, ...rest }) => {
 	return (
 		<NavLinkStyled to={`/${id}`} {...rest}>
 			{({ isActive }) => (
-				<SectionItemContainer
+				<SectionNoteContainer
 					isActive={isActive}
 					onMouseEnter={prefetch}
 					onFocus={prefetch}
 				>
 					{name}
-				</SectionItemContainer>
+				</SectionNoteContainer>
 			)}
 		</NavLinkStyled>
 	);
 };
 
-export default SectionItem;
+export default SectionNote;

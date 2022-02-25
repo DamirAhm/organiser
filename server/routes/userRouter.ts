@@ -38,7 +38,7 @@ userRouter.put('/', auth.required, (req, res, next) => {
 					if (key === 'id' || key === '_id') {
 						return res
 							.status(STATUS_CODES.BAD)
-							.json({ error: 'You can`t change item id' });
+							.json({ error: 'You can`t change note id' });
 					} else if (key === 'sections') {
 						return res
 							.status(STATUS_CODES.BAD)

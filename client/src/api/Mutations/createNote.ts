@@ -1,22 +1,22 @@
-import { NewItem } from './../../../../server/types';
-import { Item } from './../../types';
+import { NewNote } from '../../../../server/types';
+import { Note } from '../../types';
 import axios from 'axios';
 import headersWithAuth from '../../utils/headersWithAuth';
 import { SERVER_URL } from '../../constants';
 
-export type createItemType = Item | null;
-type createItemDataType = { payload: createItemType };
+export type createNoteType = Note | null;
+type createNoteDataType = { payload: createNoteType };
 
 export default async function createSection({
 	authToken,
 	newSectionData,
 }: {
 	authToken: string | null;
-	newSectionData: NewItem;
-}): Promise<createItemType> {
+	newSectionData: NewNote;
+}): Promise<createNoteType> {
 	const data = await axios
-		.post<createItemDataType>(
-			`${SERVER_URL}/items`,
+		.post<createNoteDataType>(
+			`${SERVER_URL}/notes`,
 			newSectionData,
 			headersWithAuth(authToken)
 		)

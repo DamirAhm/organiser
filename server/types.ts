@@ -1,11 +1,11 @@
 import { ObjectId, Document, Model } from 'mongoose';
 
-export type Item =
+export type Note =
 	| {
 			files: string[];
 			title: string;
 			description: string;
-			subItems: Id[];
+			subNotes: Id[];
 			tags: string[];
 			pinned: boolean;
 			user: Id;
@@ -16,7 +16,7 @@ export type Item =
 			files: string[];
 			title: string;
 			description: string;
-			subItems: Id[];
+			subNotes: Id[];
 			tags: string[];
 			pinned: boolean;
 			user: Id;
@@ -24,31 +24,31 @@ export type Item =
 			section: undefined;
 	  };
 
-export type NewItem = Omit<Item, 'files' | 'subItems' | 'pinned'>;
-export type ItemPreview = {
+export type NewNote = Omit<Note, 'files' | 'subNotes' | 'pinned'>;
+export type NotePreview = {
 	name: string;
 	id: string;
 	pinned: boolean;
 };
 
-export type ItemDocument = Document<any, any, Item> &
-	Item & {
+export type NoteDocument = Document<any, any, Note> &
+	Note & {
 		id?: string;
 		_id: ObjectId;
 	};
 
-export interface ItemModel extends Model<ItemDocument> {}
+export interface NoteModel extends Model<NoteDocument> {}
 
-export interface PopulatedItemDocument
-	extends Omit<ItemDocument, 'subItems' | 'parent' | 'section'> {
-	subItems: Item[];
-	parent: ItemDocument;
+export interface PopulatedNoteDocument
+	extends Omit<NoteDocument, 'subNotes' | 'parent' | 'section'> {
+	subNotes: Note[];
+	parent: NoteDocument;
 	section: SectionDocument;
 }
 
 export interface Section {
 	name: string;
-	items: Id[];
+	notes: Id[];
 	pinned: boolean;
 	user: Id;
 }
@@ -62,8 +62,8 @@ export type SectionDocument = Document<any, any, Section> &
 export interface SectionModel extends Model<SectionDocument> {}
 
 export interface PopulatedSectionDocument
-	extends Omit<SectionDocument, 'items' | 'user'> {
-	items: ItemDocument[];
+	extends Omit<SectionDocument, 'notes' | 'user'> {
+	notes: NoteDocument[];
 	user: UserDocument;
 }
 
@@ -109,6 +109,6 @@ export type Id = ObjectId;
 export type AvatarUrl = string;
 
 export type Deleted = {
-	items?: Id[];
+	notes?: Id[];
 	sections?: Id[];
 };

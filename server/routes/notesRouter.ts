@@ -1,18 +1,18 @@
-import { NewItem } from './../types';
+import { NewNote } from '../types';
 import { Router } from 'express';
-import { ItemModel, SectionModel } from '../database/models';
-import { Deleted, Id, Item } from '../types';
-import { populateItems, populateSubItems } from '../database/population';
+import { NoteModel, SectionModel } from '../database/models';
+import { Deleted, Id, Note } from '../types';
+import { populateNotes, populateSubNotes } from '../database/population';
 import { STATUS_CODES } from '../constants';
 import auth from '../auth';
 
-export const itemsRouter = Router();
+export const notesRouter = Router();
 
-itemsRouter.post('/', auth.required, (req, res, next) => {
+notesRouter.post('/', auth.required, (req, res, next) => {
 	(async () => {
 		try {
 			const { title, description, tags, parent, section } =
-				req.body as NewItem;
+				req.body as NewNote;
 			//@ts-ignore
 			const { id: userId } = req.payload as authJSON;
 
@@ -26,7 +26,7 @@ itemsRouter.post('/', auth.required, (req, res, next) => {
 				});
 			}
 
-			const newItem = await ItemModel.create({
+			const newNote = await NoteModel.create({
 				title,
 				description,
 				tags,
@@ -35,21 +35,21 @@ itemsRouter.post('/', auth.required, (req, res, next) => {
 				//@ts-ignore
 				user: req.payload.id,
 			});
-			await newItem.save();
+			await newNote.save();
 
 			if (parent) {
-				const parentItem = await ItemModel.findById(parent);
+				const parentNote = await NoteModel.findById(parent);
 
-				if (parentItem === null) {
+				if (parentNote === null) {
 					return res
 						.status(STATUS_CODES.BAD)
 						.json({ error: "Can't find parent" });
-				} else if (parentItem.user.toString() !== userId) {
+				} else if (parentNote.user.toString() !== userId) {
 					return res.status(403).send({ error: 'Unauthorized' });
 				}
 
-				parentItem.subItems.push(newItem.id);
-				await parentItem.save();
+				parentNote.subNotes.push(newNote.id);
+				await parentNote.save();
 			}
 			if (section) {
 				const parentSection = await SectionModel.findById(section);
@@ -62,11 +62,11 @@ itemsRouter.post('/', auth.required, (req, res, next) => {
 					return res.status(403).send({ error: 'Unauthorized' });
 				}
 
-				parentSection.items.push(newItem.id);
+				parentSection.notes.push(newNote.id);
 				await parentSection.save();
 			}
 
-			return res.json({ payload: newItem });
+			return res.json({ payload: newNote });
 		} catch (e) {
 			if (e instanceof Error) {
 				res.status(STATUS_CODES.BAD).json({ error: e.message });
@@ -77,55 +77,55 @@ itemsRouter.post('/', auth.required, (req, res, next) => {
 	})();
 });
 
-itemsRouter.delete('/:itemId', auth.required, (req, res, next) => {
+notesRouter.delete('/:noteId', auth.required, (req, res, next) => {
 	(async () => {
 		try {
-			const { itemId } = req.params as { itemId: string };
+			const { noteId } = req.params as { noteId: string };
 			//@ts-ignore
 			const { id: userId } = req.payload as authJSON;
 
-			const itemToDelete = await ItemModel.findById(itemId);
+			const noteToDelete = await NoteModel.findById(noteId);
 
-			if (itemToDelete === null) return res.json({});
+			if (noteToDelete === null) return res.json({});
 
-			const { title, id } = itemToDelete;
+			const { title, id } = noteToDelete;
 
 			//@ts-ignore
-			if (itemToDelete.user.toString() !== userId) {
+			if (noteToDelete.user.toString() !== userId) {
 				return res.status(403).send({ error: 'Unauthorized' });
 			}
 
-			if (itemToDelete.parent !== null) {
-				const parentItem = await ItemModel.findById(
-					itemToDelete.parent
+			if (noteToDelete.parent !== null) {
+				const parentNote = await NoteModel.findById(
+					noteToDelete.parent
 				);
 
-				if (parentItem) {
-					parentItem.subItems = parentItem.subItems.filter(
-						(id) => id.toString() !== itemId
+				if (parentNote) {
+					parentNote.subNotes = parentNote.subNotes.filter(
+						(id) => id.toString() !== noteId
 					);
-					await parentItem.save();
+					await parentNote.save();
 				}
 			}
-			if (itemToDelete.section !== null) {
+			if (noteToDelete.section !== null) {
 				const section = await SectionModel.findById(
-					itemToDelete.section
+					noteToDelete.section
 				);
 
 				if (section) {
-					section.items = section.items.filter(
-						(id) => id.toString() !== itemId
+					section.notes = section.notes.filter(
+						(id) => id.toString() !== noteId
 					);
 					await section.save();
 				}
 			}
-			if (itemToDelete.subItems.length !== 0) {
-				for (const subItemId of itemToDelete.subItems) {
-					await ItemModel.deleteOne({ _id: subItemId });
+			if (noteToDelete.subNotes.length !== 0) {
+				for (const subNoteId of noteToDelete.subNotes) {
+					await NoteModel.deleteOne({ _id: subNoteId });
 				}
 			}
 
-			await itemToDelete.delete();
+			await noteToDelete.delete();
 
 			res.json({ payload: { id, title } });
 		} catch (e) {
@@ -139,7 +139,7 @@ itemsRouter.delete('/:itemId', auth.required, (req, res, next) => {
 	})();
 });
 
-itemsRouter.get('/', auth.required, (req, res, next) => {
+notesRouter.get('/', auth.required, (req, res, next) => {
 	(async () => {
 		try {
 			const { sectionId } = req.query as {
@@ -160,9 +160,9 @@ itemsRouter.get('/', auth.required, (req, res, next) => {
 			if (parentSection.user.toString() !== userId) {
 				return res.status(403).send({ error: 'Unauthorized' });
 			} else if (parentSection !== null) {
-				const populatedSection = await populateItems(parentSection);
+				const populatedSection = await populateNotes(parentSection);
 
-				return res.json({ payload: populatedSection.items });
+				return res.json({ payload: populatedSection.notes });
 			}
 
 			return res.json({ payload: null });
@@ -177,18 +177,18 @@ itemsRouter.get('/', auth.required, (req, res, next) => {
 	})();
 });
 
-itemsRouter.get('/:itemId', auth.required, (req, res, next) => {
+notesRouter.get('/:noteId', auth.required, (req, res, next) => {
 	(async () => {
 		try {
-			const { itemId } = req.params as { itemId: string };
+			const { noteId } = req.params as { noteId: string };
 			//@ts-ignore
 			const { id: userId } = req.payload as authJSON;
 
-			const item = await ItemModel.findById(itemId);
+			const note = await NoteModel.findById(noteId);
 
-			if (item !== null) {
-				if (item.user.toString() !== userId)
-					return res.json({ payload: await populateSubItems(item) });
+			if (note !== null) {
+				if (note.user.toString() !== userId)
+					return res.json({ payload: await populateSubNotes(note) });
 			}
 
 			return res.json({ payload: null });
@@ -203,24 +203,24 @@ itemsRouter.get('/:itemId', auth.required, (req, res, next) => {
 	})();
 });
 
-itemsRouter.put('/:itemId', auth.required, (req, res, next) => {
+notesRouter.put('/:noteId', auth.required, (req, res, next) => {
 	(async () => {
 		try {
-			const { itemId } = req.params as { itemId: string };
+			const { noteId } = req.params as { noteId: string };
 			//@ts-ignore
 			const { id: userId } = req.payload as authJSON;
 
-			const item = await ItemModel.findById(itemId);
+			const note = await NoteModel.findById(noteId);
 
-			if (item === null) {
+			if (note === null) {
 				return res
 					.status(STATUS_CODES.BAD)
-					.json({ error: 'Can`t find item' });
-			} else if (item.user.toString() !== userId) {
+					.json({ error: 'Can`t find note' });
+			} else if (note.user.toString() !== userId) {
 				return res.status(403).send({ error: 'Unauthorized' });
 			}
 
-			const { update } = req.body as { update: Partial<Item> | null };
+			const { update } = req.body as { update: Partial<Note> | null };
 
 			if (update === null) {
 				return res
@@ -233,33 +233,33 @@ itemsRouter.put('/:itemId', auth.required, (req, res, next) => {
 					if (key === 'id' || key === '_id') {
 						return res
 							.status(STATUS_CODES.BAD)
-							.json({ error: 'You can`t change item id' });
-					} else if (key === 'subItems') {
+							.json({ error: 'You can`t change note id' });
+					} else if (key === 'subNotes') {
 						return res
 							.status(STATUS_CODES.BAD)
-							.json({ error: "You can't change subItems" });
+							.json({ error: "You can't change subNotes" });
 					}
 
 					if (key === 'parent') {
-						const parentItem = await ItemModel.findById(
-							item.parent
+						const parentNote = await NoteModel.findById(
+							note.parent
 						);
 
-						if (parentItem !== null) {
-							parentItem.subItems = parentItem.subItems.filter(
-								(id) => id.toString() === itemId
+						if (parentNote !== null) {
+							parentNote.subNotes = parentNote.subNotes.filter(
+								(id) => id.toString() === noteId
 							);
-							await parentItem.save();
+							await parentNote.save();
 						}
 
 						if (update[key] !== null) {
-							const newParentItem = await ItemModel.findById(
+							const newParentNote = await NoteModel.findById(
 								update[key]
 							);
 
-							if (newParentItem !== null) {
-								newParentItem.subItems.push(item._id);
-								await newParentItem.save();
+							if (newParentNote !== null) {
+								newParentNote.subNotes.push(note._id);
+								await newParentNote.save();
 							} else {
 								update[key] = null;
 							}
@@ -267,12 +267,12 @@ itemsRouter.put('/:itemId', auth.required, (req, res, next) => {
 					}
 					if (key === 'section') {
 						const section = await SectionModel.findById(
-							item.section
+							note.section
 						);
 
 						if (section !== null) {
-							section.items = section.items.filter(
-								(id) => id.toString() === itemId
+							section.notes = section.notes.filter(
+								(id) => id.toString() === noteId
 							);
 							await section.save();
 						}
@@ -283,7 +283,7 @@ itemsRouter.put('/:itemId', auth.required, (req, res, next) => {
 							);
 
 							if (newSection !== null) {
-								newSection.items.push(item._id);
+								newSection.notes.push(note._id);
 								await newSection.save();
 							} else {
 								update[key] = null;
@@ -292,13 +292,13 @@ itemsRouter.put('/:itemId', auth.required, (req, res, next) => {
 					}
 
 					//@ts-ignore
-					item[key] = update[key];
+					note[key] = update[key];
 				}
 			}
 
-			await item.save();
+			await note.save();
 
-			return res.json({ payload: item });
+			return res.json({ payload: note });
 		} catch (e) {
 			if (e instanceof Error) {
 				res.status(STATUS_CODES.BAD).json({ error: e.message });
@@ -310,41 +310,41 @@ itemsRouter.put('/:itemId', auth.required, (req, res, next) => {
 	})();
 });
 
-itemsRouter.post('/addSubItem', auth.required, (req, res, next) => {
+notesRouter.post('/addSubNote', auth.required, (req, res, next) => {
 	(async () => {
 		try {
-			const { to, item: newSubItem } = req.body as {
+			const { to, note: newSubNote } = req.body as {
 				to?: Id;
-				item?: NewItem;
+				note?: NewNote;
 			};
 			//@ts-ignore
 			const { id: userId } = req.payload as authJSON;
 
-			if (!to || !newSubItem) {
+			if (!to || !newSubNote) {
 				return res
 					.status(STATUS_CODES.BAD)
-					.json({ error: 'You must pass both id and item to body' });
+					.json({ error: 'You must pass both id and note to body' });
 			}
 
-			const parentItem = await ItemModel.findById(to);
+			const parentNote = await NoteModel.findById(to);
 
-			if (!parentItem) {
+			if (!parentNote) {
 				return res
 					.status(STATUS_CODES.BAD)
-					.json({ error: "Can't find parent item" });
-			} else if (parentItem.user !== userId) {
+					.json({ error: "Can't find parent note" });
+			} else if (parentNote.user !== userId) {
 				return res.status(403).send({ error: 'Unauthorized' });
 			}
-			const newItem = await ItemModel.create({
-				...newSubItem,
+			const newNote = await NoteModel.create({
+				...newSubNote,
 				user: userId,
 			});
-			await newItem.save();
+			await newNote.save();
 
-			parentItem.subItems.push(newItem._id);
-			await parentItem.save();
+			parentNote.subNotes.push(newNote._id);
+			await parentNote.save();
 
-			return res.json({ payload: newItem });
+			return res.json({ payload: newNote });
 		} catch (e) {
 			if (e instanceof Error) {
 				res.status(STATUS_CODES.BAD).json({ error: e.message });
@@ -356,4 +356,4 @@ itemsRouter.post('/addSubItem', auth.required, (req, res, next) => {
 	})();
 });
 
-export default itemsRouter;
+export default notesRouter;

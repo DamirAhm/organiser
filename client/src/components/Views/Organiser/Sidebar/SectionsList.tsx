@@ -11,8 +11,8 @@ import getSectionsList, {
 	GET_SECTIONS_LIST,
 } from '../../../../api/Queries/getSectionsList';
 import { SectionPreview } from '../../../../types';
-import SectionItem from './SectionItem';
-import SectionNamingItem from './SectionNamingItem';
+import SectionNote from './SectionItem';
+import SectionNamingNote from './SectionNamingItem';
 import renameSection, {
 	renameSectionType,
 } from '../../../../api/Mutations/renameSection';
@@ -121,7 +121,7 @@ const SectionsList: React.FC<Props> = ({
 				}
 			}
 		},
-		[stopEditing, renameAsync, authToken]
+		[stopEditing, renameAsync, authToken, openedSectionId]
 	);
 
 	//Refetch sections list query after getting new section created
@@ -162,20 +162,20 @@ const SectionsList: React.FC<Props> = ({
 
 	return (
 		<List>
-			{isCreating && <SectionNamingItem onSubmit={creationConfirmed} />}
+			{isCreating && <SectionNamingNote onSubmit={creationConfirmed} />}
 			{sectionsData && (
 				<>
 					{sectionsData.map((section) => (
 						<Fragment key={section.id}>
 							{section.id === editableSection ? (
-								<SectionNamingItem
+								<SectionNamingNote
 									defaultValue={section.name}
 									onSubmit={(name: string) =>
 										rename(section.id, name, section.name)
 									}
 								/>
 							) : (
-								<SectionItem
+								<SectionNote
 									onDoubleClick={() =>
 										startEditing(section.id)
 									}
