@@ -11,7 +11,7 @@ export const notesRouter = Router();
 notesRouter.post('/', auth.required, (req, res, next) => {
 	(async () => {
 		try {
-			const { title, description, tags, parent, section } =
+			const { title, description, tags, parent, section, files } =
 				req.body as NewNote;
 			//@ts-ignore
 			const { id: userId } = req.payload as authJSON;
@@ -32,8 +32,8 @@ notesRouter.post('/', auth.required, (req, res, next) => {
 				tags,
 				parent,
 				section,
-				//@ts-ignore
-				user: req.payload.id,
+				files,
+				user: userId,
 			});
 			await newNote.save();
 

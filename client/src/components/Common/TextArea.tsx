@@ -5,19 +5,19 @@ import styled from 'styled-components';
 type Props = {
 	onChange: (e: string) => void;
 	value: string;
-} & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'>;
+} & Omit<React.InputHTMLAttributes<HTMLTextAreaElement>, 'onChange' | 'value'>;
 
-const SearchContainer = styled.div`
+const TextAreaContainer = styled.div`
 	position: relative;
 	width: 100%;
 	height: 100%;
 `;
 const ClearButton = styled.button`
 	position: absolute;
-	background-color: white;
+	background-color: transparent;
 	color: var(--main);
 	right: 0.5rem;
-	top: calc(50% - 18px / 2);
+	top: 0.5rem;
 	display: flex;
 	fill: var(--negative);
 	cursor: pointer;
@@ -27,35 +27,30 @@ const ClearButton = styled.button`
 	}
 `;
 
-const Input = styled.input`
+const StyledTextArea = styled.textarea`
 	padding: calc(10px - 0.3rem / 2) 15px;
 	border-radius: 10px;
 	height: 100%;
 	color: var(--main);
-	box-sizing: border-box;
 	width: 100%;
 	font-size: 1.1rem;
+	resize: none;
 `;
 
-const Searcher: React.FC<Props> = ({ onChange, value, ...props }) => {
-	const inputRef = React.createRef<HTMLInputElement>();
-
+const TextArea: React.FC<Props> = ({ onChange, value, ...props }) => {
 	const clear = useCallback(() => {
 		onChange('');
 	}, []);
 	const changeHandler = useCallback(
-		(e: React.ChangeEvent<HTMLInputElement>) => {
+		(e: React.ChangeEvent<HTMLTextAreaElement>) => {
 			onChange(e.target.value);
 		},
 		[]
 	);
 
 	return (
-		<SearchContainer onClick={(e) => e.stopPropagation()}>
-			<Input
-				data-testid='input'
-				ref={inputRef}
-				className={'input'}
+		<TextAreaContainer onClick={(e) => e.stopPropagation()}>
+			<StyledTextArea
 				type='text'
 				value={value}
 				onChange={changeHandler}
@@ -67,8 +62,8 @@ const Searcher: React.FC<Props> = ({ onChange, value, ...props }) => {
 				className={`clear`}
 				size={18}
 			/>
-		</SearchContainer>
+		</TextAreaContainer>
 	);
 };
 
-export default React.memo(Searcher);
+export default React.memo(TextArea);

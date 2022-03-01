@@ -11,6 +11,7 @@ export type Note =
 			user: Id;
 			parent: undefined;
 			section: Id | null;
+			id: Id;
 	  }
 	| {
 			files: string[];
@@ -22,9 +23,10 @@ export type Note =
 			user: Id;
 			parent: Id | null;
 			section: undefined;
+			id: Id;
 	  };
 
-export type NewNote = Omit<Note, 'files' | 'subNotes' | 'pinned'>;
+export type NewNote = Omit<Note, 'subNotes' | 'pinned' | 'id' | 'user'>;
 export type NotePreview = {
 	name: string;
 	id: string;

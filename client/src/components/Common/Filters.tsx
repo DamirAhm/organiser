@@ -1,7 +1,7 @@
 import React, { HTMLAttributes, SetStateAction, useState } from 'react';
 import styled from 'styled-components';
 
-import Searcher from './Search';
+import Input from './Input';
 import Select from './Select';
 
 const FiltersContainer = styled.div`
@@ -64,7 +64,7 @@ const Filters: React.FC<Props> = ({
 	return (
 		<FiltersContainer {...props}>
 			<SearchContainer {...inputProps}>
-				<Searcher
+				<Input
 					onChange={(text: string) => {
 						setText(text);
 						onSearchChange(text);

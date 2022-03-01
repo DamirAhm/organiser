@@ -71,7 +71,7 @@ const SectionsList: React.FC<Props> = ({
 					{
 						name,
 						pinned: false,
-						id: 'placeholder' + new Date().getTime().toString(),
+						id: 'placeholder' + Date.now(),
 					},
 				]
 			);

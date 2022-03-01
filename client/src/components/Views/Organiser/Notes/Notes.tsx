@@ -1,14 +1,19 @@
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 import { GoPlus } from 'react-icons/go';
-import getNotes, { GET_NOTES } from '../../../../api/Queries/getNotes';
-import { useMutation, useQuery } from 'react-query';
+import getNotes, {
+	getNotesType,
+	GET_NOTES,
+} from '../../../../api/Queries/getNotes';
+import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { useOpenedSection } from '../../../../hooks/useOpenedSection';
 import useAuthToken from '../../../../hooks/useAuthToken';
-import {
+import createNote, {
 	createNoteArgs,
 	createNoteType,
 } from '../../../../api/Mutations/createNote';
+import NoteEditingModal from './Note/NoteEditingModal';
+import { NewNote } from '../../../../types';
 
 const NotesContainer = styled.div`
 	background-color: #eef;
@@ -54,6 +59,10 @@ type Props = {};
 const Notes: React.FC<Props> = ({}) => {
 	const { authToken } = useAuthToken();
 	const { openedSectionId } = useOpenedSection();
+
+	const [isCreating, setIsCreating] = useState(false);
+
+	const queryClient = useQueryClient();
 	const { data } = useQuery(GET_NOTES, () =>
 		getNotes(authToken, openedSectionId!)
 	);
@@ -62,22 +71,65 @@ const Notes: React.FC<Props> = ({}) => {
 		createNoteType,
 		unknown,
 		createNoteArgs
-	>({
-		onMutate() {},
+	>(createNote, {
+		onMutate: ({ newNoteData }) => {
+			queryClient.cancelQueries(GET_NOTES);
+
+			const oldNotes = queryClient.getQueryData<getNotesType>(GET_NOTES);
+
+			queryClient.setQueryData<getNotesType>(GET_NOTES, (oldNotes) => {
+				return [
+					...(oldNotes || []),
+					{
+						...newNoteData,
+						files: [],
+						id: `placeholder-${Date.now()}`,
+						pinned: false,
+						subNotes: [],
+						user: `placeholder-${Date.now()}`,
+						section: openedSectionId,
+					},
+				];
+			});
+
+			return () => queryClient.setQueryData(GET_NOTES, oldNotes);
+		},
 	});
+
+	const stopCreating = useCallback(
+		() => setIsCreating(false),
+		[setIsCreating]
+	);
+	const create = useCallback(
+		(newNote: NewNote) => {
+			stopCreating();
+			createNoteAsync({
+				authToken: authToken!,
+				newNoteData: newNote,
+				section: openedSectionId!,
+			});
+		},
+		[createNoteAsync, authToken, stopCreating]
+	);
 
 	return (
 		<NotesContainer>
-			<AddButton>
-				Создать <GoPlus color='var(--border-color)' size={20} />
-			</AddButton>
+			{!isCreating && (
+				<AddButton onClick={() => setIsCreating(true)}>
+					Создать <GoPlus color='var(--border-color)' size={20} />
+				</AddButton>
+			)}
 
 			{data && (
 				<NotesWrapper>
 					{data.map(({ title }) => (
-						<NoteElement>{title}</NoteElement>
+						<NoteElement key={title}>{title}</NoteElement>
 					))}
 				</NotesWrapper>
+			)}
+
+			{isCreating && (
+				<NoteEditingModal onFilled={create} onRejected={stopCreating} />
 			)}
 		</NotesContainer>
 	);

@@ -6,56 +6,55 @@ export type optionType<Value = string> = {
 export interface User {
 	email: string;
 	name: Name;
-	sections: Id[];
+	sections: string[];
 	photo_url: AvatarUrl | null;
 	hash?: string;
 	salt?: string;
-	googleId?: string;
+	googlestring?: string;
 	id: string;
 }
 
 export type authJSON = {
-	id: Id;
+	id: string;
 	email: string;
 	name: string;
 	token: string;
 };
 
 export type Name = string;
-export type Id = string;
 export type AvatarUrl = string;
 
 export type Deleted = {
-	notes?: Id[];
-	sections?: Id[];
-	users?: Id[];
+	notes?: string[];
+	sections?: string[];
+	users?: string[];
 };
 
 export type Note =
 	| {
-			files: string[];
 			title: string;
 			description: string;
-			subNotes: Id[];
 			tags: string[];
+			files: string[];
+			subNotes: string[];
 			pinned: boolean;
-			user: Id;
+			user: string;
 			id: string;
-			section: Id | null;
+			section: string | null;
 	  }
 	| {
-			files: string[];
 			title: string;
 			description: string;
-			subNotes: Id[];
 			tags: string[];
+			files: string[];
+			subNotes: string[];
 			pinned: boolean;
 			id: string;
-			user: Id;
-			parent: Id | null;
+			user: string;
+			parent: string | null;
 	  };
 
-export type NewNote = Omit<Note, 'files' | 'subNotes' | 'pinned'>;
+export type NewNote = Omit<Note, 'subNotes' | 'pinned' | 'id' | 'user'>;
 export type NotePreview = {
 	name: string;
 	id: string;

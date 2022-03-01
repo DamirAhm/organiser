@@ -22,7 +22,6 @@ const SidebarContainer = styled.aside`
 	width: var(--sidebar-width);
 	height: 100%;
 	color: var(--text-color);
-	z-index: 9999;
 `;
 
 type Props = {};
