@@ -5,6 +5,7 @@ import { optionType } from '../../types';
 const SortBy = styled.select`
 	grid-column: 3;
 	padding: 6px 10px;
+	box-shadow: 0px 1px 2px -1px black;
 `;
 const SortByOption = styled.option``;
 

@@ -10,6 +10,9 @@ import {
 } from 'react-query';
 import { HashRouter, BrowserRouter } from 'react-router-dom';
 import ErrorBoundary from './components/ErrorBoundary';
+import ReactModal from 'react-modal';
+
+ReactModal.setAppElement(document.querySelector('#root') as HTMLElement);
 
 const queryClient = new QueryClient({
 	queryCache: new QueryCache(),

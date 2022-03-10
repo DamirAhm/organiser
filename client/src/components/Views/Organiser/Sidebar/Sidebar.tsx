@@ -66,7 +66,7 @@ const Sidebar: React.FC<Props> = ({}) => {
 	useEscape(cancelAnyActions);
 
 	return (
-		<SidebarContainer onClick={cancelAnyActions}>
+		<SidebarContainer onBlurCapture={cancelAnyActions}>
 			{isFetchingUser || !user ? (
 				<SidebarHeaderContainer>
 					<Loader />

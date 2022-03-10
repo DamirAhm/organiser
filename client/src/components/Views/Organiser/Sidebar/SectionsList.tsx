@@ -13,7 +13,7 @@ import getSectionsList, {
 } from '../../../../api/Queries/getSectionsList';
 import { SectionPreview } from '../../../../types';
 import SectionNote from './SectionItem';
-import SectionNamingNote from './SectionNamingItem';
+import SectionNamingElement from './SectionNamingItem';
 import renameSection, {
 	renameSectionArgs,
 	renameSectionType,
@@ -89,17 +89,17 @@ const SectionsList: React.FC<Props> = ({
 		onMutate: ({ sectionId, name }) => {
 			queryClient.cancelQueries(GET_SECTIONS_LIST);
 
-			const previousSectionsList =
+			const SectionsListBackup =
 				queryClient.getQueryData<getSectionsListType>(
 					GET_SECTIONS_LIST
 				);
 
 			queryClient.setQueryData<getSectionsListType>(
 				GET_SECTIONS_LIST,
-				(old) =>
-					old === undefined
+				(oldSectionsList) =>
+					oldSectionsList === undefined
 						? []
-						: old.map((section) =>
+						: oldSectionsList.map((section) =>
 								section.id !== sectionId
 									? section
 									: { ...section, name }
@@ -107,10 +107,28 @@ const SectionsList: React.FC<Props> = ({
 			);
 
 			return () =>
-				queryClient.setQueryData(
+				queryClient.setQueryData(GET_SECTIONS_LIST, SectionsListBackup);
+		},
+		onSuccess: (newSectionData) => {
+			if (newSectionData) {
+				const { name, id: sectionId, pinned } = newSectionData;
+
+				queryClient.cancelQueries(GET_SECTIONS_LIST);
+
+				queryClient.setQueryData<getSectionsListType>(
 					GET_SECTIONS_LIST,
-					previousSectionsList
+					(oldSectionsList) => {
+						if (oldSectionsList) {
+							return oldSectionsList.map((section) =>
+								section.id === sectionId
+									? { name, id: sectionId, pinned }
+									: section
+							);
+						}
+						return [];
+					}
 				);
+			}
 		},
 	});
 
@@ -127,12 +145,8 @@ const SectionsList: React.FC<Props> = ({
 	);
 
 	//Refetch sections list query after getting new section created
-	const onNewSectionFetched = useCallback((newSection: SectionPreview) => {
-		setOpenedSectionId(newSection.id);
-
-		queryClient.refetchQueries(GET_SECTIONS_LIST, {
-			exact: true,
-		});
+	const onNewSectionCreated = useCallback((newSectionId: string) => {
+		setOpenedSectionId(newSectionId);
 	}, []);
 
 	const creationConfirmed = useCallback(
@@ -145,7 +159,7 @@ const SectionsList: React.FC<Props> = ({
 			const newSection = await createAsync({ authToken, name });
 
 			if (newSection !== null) {
-				onNewSectionFetched(newSection);
+				onNewSectionCreated(newSection.id);
 			}
 		},
 		[authToken, createAsync]
@@ -164,13 +178,15 @@ const SectionsList: React.FC<Props> = ({
 
 	return (
 		<List>
-			{isCreating && <SectionNamingNote onSubmit={creationConfirmed} />}
+			{isCreating && (
+				<SectionNamingElement onSubmit={creationConfirmed} />
+			)}
 			{sectionsData && (
 				<>
 					{sectionsData.map((section) => (
 						<Fragment key={section.id}>
 							{section.id === editableSection ? (
-								<SectionNamingNote
+								<SectionNamingElement
 									defaultValue={section.name}
 									onSubmit={(name: string) =>
 										rename(section.id, name, section.name)

@@ -24,6 +24,9 @@ const SectionNamingNoteContainer = styled.label`
 		padding: 5px 10px;
 		font-size: 1.2rem;
 		width: 100%;
+		outline: none;
+		box-shadow: 0px 1px 2px -1px black;
+		border-radius: 3px;
 	}
 `;
 
@@ -32,7 +35,7 @@ type Props = {
 	defaultValue?: string;
 };
 
-const SectionNamingNote: React.FC<Props> = ({
+const SectionNamingElement: React.FC<Props> = ({
 	onSubmit,
 	defaultValue = '',
 }) => {
@@ -64,4 +67,4 @@ const SectionNamingNote: React.FC<Props> = ({
 	);
 };
 
-export default SectionNamingNote;
+export default SectionNamingElement;

@@ -3,18 +3,18 @@ import axios from 'axios';
 import headersWithAuth from '../../utils/headersWithAuth';
 import { Note } from '../../types';
 
-export const GET_NOTES = 'getNotes';
+export const GET_NOTE = 'getNote';
 
-export type getNotesType = Note[];
-type getNotesDataType = { payload: getNotesType };
+export type getNoteType = Note | null;
+type getNoteDataType = { payload: Note | null };
 
-export default async function getNotes(
+export default async function getNote(
 	authToken: string | null,
-	sectionId: string
-): Promise<getNotesType> {
+	noteId: string
+): Promise<getNoteType> {
 	const data = await axios
-		.get<getNotesDataType>(
-			`${SERVER_URL}/notes?sectionId=${sectionId}`,
+		.get<getNoteDataType>(
+			`${SERVER_URL}/notes/${noteId}`,
 			headersWithAuth(authToken)
 		)
 		.then(({ data }) => data.payload);

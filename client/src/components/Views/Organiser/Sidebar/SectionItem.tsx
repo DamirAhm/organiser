@@ -14,6 +14,7 @@ export const SectionNoteContainer = styled.li<{ isActive: boolean }>`
 			? 'border: 2px solid var(--positive);'
 			: `
 				border: 2px solid transparent;
+				transition: 200ms;
 				border-bottom: 2px solid var(--border-color);
 
 				&:hover {
@@ -44,7 +45,7 @@ const SectionNote: React.FC<Props> = ({ name, id, pinned, ...rest }) => {
 	const queryClient = useQueryClient();
 	const { authToken } = useAuthToken();
 
-	const prefetch = useCallback(() => {
+	const prefetchSection = useCallback(() => {
 		if (!id.startsWith('placeholder') && !prefetched) {
 			queryClient.prefetchQuery({
 				queryKey: [GET_SECTION, id],
@@ -60,8 +61,8 @@ const SectionNote: React.FC<Props> = ({ name, id, pinned, ...rest }) => {
 			{({ isActive }) => (
 				<SectionNoteContainer
 					isActive={isActive}
-					onMouseEnter={prefetch}
-					onFocus={prefetch}
+					onMouseEnter={prefetchSection}
+					onFocus={prefetchSection}
 				>
 					{name}
 				</SectionNoteContainer>

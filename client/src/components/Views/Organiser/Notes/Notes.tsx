@@ -1,10 +1,10 @@
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 import { GoPlus } from 'react-icons/go';
-import getNotes, {
+import getNotesList, {
 	getNotesType,
 	GET_NOTES,
-} from '../../../../api/Queries/getNotes';
+} from '../../../../api/Queries/getNotesList';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { useOpenedSection } from '../../../../hooks/useOpenedSection';
 import useAuthToken from '../../../../hooks/useAuthToken';
@@ -14,15 +14,20 @@ import createNote, {
 } from '../../../../api/Mutations/createNote';
 import NoteEditingModal from './Note/NoteEditingModal';
 import { NewNote } from '../../../../types';
+import NoteElement, { NoteContainer } from './NoteElement';
+import { Route, Routes } from 'react-router-dom';
+import NoteModalWrapper from './Note/NoteModalWrapper';
 
 const NotesContainer = styled.div`
 	background-color: #eef;
 	width: 100%;
 	height: 100%;
 	display: grid;
-	grid-template-rows: 40px 1fr;
-	justify-content: flex-start;
+	grid-template: 40px 1fr / 1fr;
+	grid-gap: 20px;
+	justify-content: center;
 	padding: 20px;
+	font-size: 1.2rem;
 `;
 
 const AddButton = styled.button`
@@ -35,6 +40,8 @@ const AddButton = styled.button`
 	width: 160px;
 	color: var(--bold-text-color);
 	border: 2px solid var(--border-color);
+
+	transition: 200ms;
 
 	&:hover,
 	&:focus {
@@ -50,9 +57,15 @@ const AddButton = styled.button`
 
 const NotesWrapper = styled.div`
 	height: 100%;
-`;
+	width: 100%;
+	display: flex;
+	align-items: center;
+	flex-direction: column;
 
-const NoteElement = styled.div``;
+	& > ${NoteContainer} + ${NoteContainer} {
+		margin-top: 20px;
+	}
+`;
 
 type Props = {};
 
@@ -64,7 +77,7 @@ const Notes: React.FC<Props> = ({}) => {
 
 	const queryClient = useQueryClient();
 	const { data } = useQuery(GET_NOTES, () =>
-		getNotes(authToken, openedSectionId!)
+		getNotesList(authToken, openedSectionId!)
 	);
 
 	const { mutateAsync: createNoteAsync } = useMutation<
@@ -75,24 +88,41 @@ const Notes: React.FC<Props> = ({}) => {
 		onMutate: ({ newNoteData }) => {
 			queryClient.cancelQueries(GET_NOTES);
 
-			const oldNotes = queryClient.getQueryData<getNotesType>(GET_NOTES);
+			const notesBackup =
+				queryClient.getQueryData<getNotesType>(GET_NOTES);
 
 			queryClient.setQueryData<getNotesType>(GET_NOTES, (oldNotes) => {
 				return [
 					...(oldNotes || []),
 					{
-						...newNoteData,
-						files: [],
+						title: newNoteData.title,
 						id: `placeholder-${Date.now()}`,
 						pinned: false,
-						subNotes: [],
-						user: `placeholder-${Date.now()}`,
-						section: openedSectionId,
 					},
 				];
 			});
 
-			return () => queryClient.setQueryData(GET_NOTES, oldNotes);
+			return () => queryClient.setQueryData(GET_NOTES, notesBackup);
+		},
+		onSuccess: (newNoteData) => {
+			if (newNoteData !== null) {
+				const { title, id: noteId, pinned } = newNoteData;
+				queryClient.cancelQueries(GET_NOTES);
+
+				queryClient.setQueryData<getNotesType>(
+					GET_NOTES,
+					(oldNotes) => {
+						if (oldNotes) {
+							return oldNotes.map((note) =>
+								note.id === newNoteData?.id
+									? { title, id: noteId, pinned }
+									: note
+							);
+						}
+						return [];
+					}
+				);
+			}
 		},
 	});
 
@@ -119,18 +149,22 @@ const Notes: React.FC<Props> = ({}) => {
 					Создать <GoPlus color='var(--border-color)' size={20} />
 				</AddButton>
 			)}
-
 			{data && (
 				<NotesWrapper>
-					{data.map(({ title }) => (
-						<NoteElement key={title}>{title}</NoteElement>
+					{data.map((note) => (
+						<NoteElement key={note.title} {...note}></NoteElement>
 					))}
 				</NotesWrapper>
 			)}
-
+			{/* //TODO открывать подробности заметки в роуте */}
+			{/* <Route path=':noteId' element={NoteModal} /> */}
 			{isCreating && (
 				<NoteEditingModal onFilled={create} onRejected={stopCreating} />
 			)}
+
+			<Routes>
+				<Route path=':noteId' element={<NoteModalWrapper />} />
+			</Routes>
 		</NotesContainer>
 	);
 };

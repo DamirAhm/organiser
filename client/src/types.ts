@@ -56,7 +56,7 @@ export type Note =
 
 export type NewNote = Omit<Note, 'subNotes' | 'pinned' | 'id' | 'user'>;
 export type NotePreview = {
-	name: string;
+	title: string;
 	id: string;
 	pinned: boolean;
 };

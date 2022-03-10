@@ -2,6 +2,7 @@ import React, { useCallback } from 'react';
 import { GoPlus } from 'react-icons/go';
 import styled from 'styled-components';
 import PhotoPlaceholder from '../../../Common/PhotoPlaceholder';
+import { ColloredButton } from '../../../CommonStyled';
 
 export const SidebarHeaderContainer = styled.header`
 	padding: 20px;
@@ -30,23 +31,10 @@ const Photo = styled.img`
 	margin-right: 10px;
 `;
 
-const AddButton = styled.button`
+const HeaderButton = styled(ColloredButton)`
 	width: 50px;
 	height: 50px;
 	border-radius: 50%;
-
-	& > * {
-		fill: var(--positive);
-	}
-
-	&:hover,
-	&:focus {
-		background-color: var(--positive);
-
-		svg {
-			fill: white;
-		}
-	}
 `;
 
 type Props = {
@@ -81,9 +69,9 @@ const SidebarHeader: React.FC<Props> = ({
 				<UserName>{name}</UserName>
 			</UserInfo>
 			{showButton && (
-				<AddButton onClick={handleClick}>
+				<HeaderButton color='var(--positive)' onClick={handleClick}>
 					<GoPlus size={30} />
-				</AddButton>
+				</HeaderButton>
 			)}
 		</SidebarHeaderContainer>
 	);

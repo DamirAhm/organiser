@@ -28,6 +28,7 @@ const ClearButton = styled.button`
 `;
 
 const StyledInput = styled.input`
+	box-shadow: 0px 1px 2px -1px black;
 	padding: calc(10px - 0.3rem / 2) 15px;
 	border-radius: 10px;
 	height: 100%;

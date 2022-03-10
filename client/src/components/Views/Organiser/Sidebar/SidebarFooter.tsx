@@ -12,52 +12,20 @@ import {
 	GET_SECTIONS_LIST,
 	getSectionsListType,
 } from '../../../../api/Queries/getSectionsList';
-import { sectionsList } from '../../../../types';
 import { SidebarHeaderContainer } from './SidebarHeader';
+import { ColloredButton } from '../../../CommonStyled';
 
 const SidebarFooterContainer = styled(SidebarHeaderContainer)`
 	background-color: var(--background-color);
 	box-shadow: inset 0px 1px 2px -1px black;
 	position: relative;
 `;
-const Pen = styled.button`
+
+const FooterButton = styled(ColloredButton)`
 	width: 50px;
 	height: 50px;
 	color: var(--text-color);
 	border-radius: 50%;
-
-	& > * {
-		fill: var(--bold-text-color);
-	}
-
-	&:hover,
-	&:focus {
-		background-color: var(--bold-text-color);
-
-		svg {
-			fill: white;
-		}
-	}
-`;
-const Trash = styled.button`
-	width: 50px;
-	height: 50px;
-	color: var(--text-color);
-	border-radius: 50%;
-
-	& > * {
-		fill: var(--negative);
-	}
-
-	&:hover,
-	&:focus {
-		background-color: var(--negative);
-	}
-
-	&:hover > svg,
-	&:focus > svg {
-		fill: white;
-	}
 `;
 
 type Props = {
@@ -117,15 +85,18 @@ const SidebarFooter: React.FC<Props> = ({
 	return (
 		<SidebarFooterContainer as='footer'>
 			{!isEditing ? (
-				<Pen onClick={() => startEditing(openedSectionId!)}>
+				<FooterButton
+					color='var(--border-color)'
+					onClick={() => startEditing(openedSectionId!)}
+				>
 					<GoPencil size={30} />
-				</Pen>
+				</FooterButton>
 			) : (
 				<div></div>
 			)}
-			<Trash onClick={deleteSection}>
+			<FooterButton color='var(--negative)' onClick={deleteSection}>
 				<GoTrashcan size={30} />
-			</Trash>
+			</FooterButton>
 		</SidebarFooterContainer>
 	);
 };

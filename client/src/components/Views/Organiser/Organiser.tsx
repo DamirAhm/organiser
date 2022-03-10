@@ -48,7 +48,7 @@ const Organiser: React.FC = () => {
 					}
 				>
 					<Routes>
-						<Route path=':sectionId' element={<NotesSection />} />
+						<Route path=':sectionId/*' element={<NotesSection />} />
 						<Route path='' element={<ContentPlaceholder />} />
 					</Routes>
 				</Suspense>

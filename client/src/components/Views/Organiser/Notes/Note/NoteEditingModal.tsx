@@ -17,7 +17,7 @@ const InputContainer = styled.div`
 
 const TextAreaContainer = styled.div`
 	width: min(80%, 360px);
-	heigth: 120px;
+	height: 120px;
 `;
 
 const CreationControls = styled.div`
@@ -46,6 +46,7 @@ type Props = {
 	onRejected: () => void;
 };
 
+//TODO сохранять прошлый стейт в LocalStorage
 const NoteEditingModal: React.FC<Props> = ({ onFilled, onRejected }) => {
 	const [newNote, dispatch] = useReducer<React.Reducer<NewNote, ActionType>>(
 		NoteEditingReducer,
@@ -69,7 +70,6 @@ const NoteEditingModal: React.FC<Props> = ({ onFilled, onRejected }) => {
 	return (
 		<StyledReactModal
 			as={ReactModal}
-			appElement={document.querySelector('.app') as HTMLElement}
 			isOpen={true}
 			style={{
 				overlay: {
