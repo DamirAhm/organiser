@@ -1,4 +1,4 @@
-import { Note, NoteDocument } from '../../types';
+import { NoteDocument } from '../../types';
 import { model, Schema, SchemaTypes } from 'mongoose';
 
 const NoteSchema = new Schema<NoteDocument>({
@@ -36,6 +36,11 @@ const NoteSchema = new Schema<NoteDocument>({
 		type: SchemaTypes.ObjectId,
 		ref: 'Note',
 		default: null,
+	},
+	user: {
+		type: SchemaTypes.ObjectId,
+		required: true,
+		ref: 'User',
 	},
 });
 

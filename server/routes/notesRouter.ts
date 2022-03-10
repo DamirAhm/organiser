@@ -13,6 +13,7 @@ notesRouter.post('/', auth.required, (req, res, next) => {
 		try {
 			const { title, description, tags, parent, section, files } =
 				req.body as NewNote;
+
 			//@ts-ignore
 			const { id: userId } = req.payload as authJSON;
 
@@ -160,9 +161,57 @@ notesRouter.get('/', auth.required, (req, res, next) => {
 			if (parentSection.user.toString() !== userId) {
 				return res.status(403).send({ error: 'Unauthorized' });
 			} else if (parentSection !== null) {
-				const populatedSection = await populateNotes(parentSection);
+				const notes = await NoteModel.find({
+					_id: { $in: parentSection.notes },
+				});
 
-				return res.json({ payload: populatedSection.notes });
+				return res.json({ payload: notes });
+			}
+
+			return res.json({ payload: null });
+		} catch (e) {
+			if (e instanceof Error) {
+				res.status(STATUS_CODES.BAD).send({ error: e.message });
+				next(e);
+			} else {
+				next(e);
+			}
+		}
+	})();
+});
+
+notesRouter.get('/list', auth.required, (req, res, next) => {
+	(async () => {
+		try {
+			const { sectionId } = req.query as {
+				sectionId: string;
+			};
+			//@ts-ignore
+			const { id: userId } = req.payload as authJSON;
+
+			if (!sectionId) {
+				return res.status(STATUS_CODES.BAD).json({
+					error: 'You must pass sectionId into query string',
+				});
+			}
+
+			const parentSection = await SectionModel.findById(sectionId);
+
+			//@ts-ignore
+			if (parentSection.user.toString() !== userId) {
+				return res.status(403).send({ error: 'Unauthorized' });
+			} else if (parentSection !== null) {
+				const notes = await NoteModel.find({
+					_id: { $in: parentSection.notes },
+				});
+
+				return res.json({
+					payload: notes.map(({ title, id, pinned }) => ({
+						title,
+						id,
+						pinned,
+					})),
+				});
 			}
 
 			return res.json({ payload: null });
@@ -187,8 +236,10 @@ notesRouter.get('/:noteId', auth.required, (req, res, next) => {
 			const note = await NoteModel.findById(noteId);
 
 			if (note !== null) {
-				if (note.user.toString() !== userId)
-					return res.json({ payload: await populateSubNotes(note) });
+				if (note.user.toString() !== userId) {
+					return res.status(403).send({ error: 'Unauthorized' });
+				}
+				return res.json({ payload: await populateSubNotes(note) });
 			}
 
 			return res.json({ payload: null });
