@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { MdClose } from 'react-icons/md';
 import styled from 'styled-components';
 
@@ -7,27 +7,34 @@ type Props = {
 	value: string;
 } & Omit<React.InputHTMLAttributes<HTMLTextAreaElement>, 'onChange' | 'value'>;
 
-const TextAreaContainer = styled.div`
-	position: relative;
-	width: 100%;
-	height: 100%;
-`;
 const ClearButton = styled.button`
 	position: absolute;
 	background-color: transparent;
 	color: var(--main);
 	right: 0.5rem;
 	top: 0.5rem;
-	display: flex;
+	display: none;
 	fill: var(--negative);
 	cursor: pointer;
+	border-radius: 50%;
 
 	&:hover {
 		transform: scale(1.3);
 	}
 `;
 
+const TextAreaContainer = styled.div`
+	position: relative;
+	width: 100%;
+	height: 100%;
+
+	&:hover ${ClearButton}, &:focus-within ${ClearButton} {
+		display: flex;
+	}
+`;
+
 const StyledTextArea = styled.textarea`
+	box-shadow: 0px 1px 2px -1px black;
 	padding: calc(10px - 0.3rem / 2) 15px;
 	border-radius: 10px;
 	height: 100%;
@@ -38,9 +45,13 @@ const StyledTextArea = styled.textarea`
 `;
 
 const TextArea: React.FC<Props> = ({ onChange, value, ...props }) => {
+	const TextAreaRef = useRef<HTMLTextAreaElement>(null);
+
 	const clear = useCallback(() => {
 		onChange('');
-	}, []);
+		TextAreaRef.current?.focus();
+	}, [TextAreaRef]);
+
 	const changeHandler = useCallback(
 		(e: React.ChangeEvent<HTMLTextAreaElement>) => {
 			onChange(e.target.value);
@@ -51,17 +62,15 @@ const TextArea: React.FC<Props> = ({ onChange, value, ...props }) => {
 	return (
 		<TextAreaContainer onClick={(e) => e.stopPropagation()}>
 			<StyledTextArea
+				ref={TextAreaRef}
 				type='text'
 				value={value}
 				onChange={changeHandler}
 				{...props}
 			/>
-			<ClearButton
-				as={MdClose}
-				onClick={clear}
-				className={`clear`}
-				size={18}
-			/>
+			<ClearButton tabIndex={0} onClick={clear}>
+				<MdClose size={18} color='var(--negative)' />
+			</ClearButton>
 		</TextAreaContainer>
 	);
 };
