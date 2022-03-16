@@ -8,7 +8,7 @@ export const GET_SECTION = 'getSection';
 export type getSectionType = Section | null;
 type getSectionDataType = { payload: Section | null };
 
-export default async function getSection(
+export default async function getSectionQuery(
 	authToken: string | null,
 	sectionId: string
 ): Promise<getSectionType> {

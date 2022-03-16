@@ -3,7 +3,9 @@ import { useQueryClient } from 'react-query';
 import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 import useAuthToken from '../../../../hooks/useAuthToken';
-import getSection, { GET_SECTION } from '../../../../api/Queries/getSection';
+import getSectionQuery, {
+	GET_SECTION,
+} from '../../../../api/Queries/getSection';
 import { SectionPreview } from '../../../../types';
 
 export const SectionNoteContainer = styled.li<{ isActive: boolean }>`
@@ -49,7 +51,7 @@ const SectionNote: React.FC<Props> = ({ name, id, pinned, ...rest }) => {
 		if (!id.startsWith('placeholder') && !prefetched) {
 			queryClient.prefetchQuery({
 				queryKey: [GET_SECTION, id],
-				queryFn: () => getSection(authToken, id),
+				queryFn: () => getSectionQuery(authToken, id),
 			});
 
 			setPrefetched(true);

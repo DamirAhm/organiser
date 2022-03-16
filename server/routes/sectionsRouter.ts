@@ -4,7 +4,6 @@ import { authJSON, Section } from '../types';
 import { populateNotes, populateSections } from '../database/population';
 import { STATUS_CODES } from '../constants';
 import auth from '../auth';
-import mongoose, { Condition } from 'mongoose';
 
 export const sectionsRouter = Router();
 
@@ -38,7 +37,7 @@ sectionsRouter.post('/', auth.required, (req, res, next) => {
 			parentUser.sections.push(newSection.id);
 			await parentUser.save();
 
-			const { id } = newSection;
+			const id = newSection.id;
 			return res.json({
 				payload: { name: sectionName, pinned: false, id },
 			});
@@ -168,9 +167,9 @@ sectionsRouter.get('/:sectionId', auth.required, (req, res, next) => {
 					return res.status(403).send({ error: 'Unauthorized' });
 				}
 
-				return res
-					.status(STATUS_CODES.GOOD)
-					.json({ payload: await populateNotes(section) });
+				return res.status(STATUS_CODES.GOOD).json({
+					payload: await populateNotes(section),
+				});
 			}
 
 			return res.json({ payload: null });
@@ -235,7 +234,8 @@ sectionsRouter.put('/:sectionId', auth.required, (req, res, next) => {
 
 			await section.save();
 
-			return res.json({ payload: section });
+			const id = section.id;
+			return res.json({ payload: { ...section, id } });
 		} catch (e) {
 			if (e instanceof Error) {
 				res.status(STATUS_CODES.BAD).json({ error: e.message });

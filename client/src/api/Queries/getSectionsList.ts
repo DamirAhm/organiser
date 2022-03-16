@@ -8,7 +8,7 @@ export const GET_SECTIONS_LIST = 'getSectionsList';
 export type getSectionsListType = sectionsList;
 type getSectionsListDataType = { payload: getSectionsListType };
 
-export default async function getSectionsList(
+export default async function getSectionsListQuery(
 	authToken: string | null
 ): Promise<getSectionsListType> {
 	const data = await axios

@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 import Input from '../../../../Common/Input';
+import { ColloredButton } from '../../../../CommonStyled';
 import { TagsContainer } from './NoteModalsStyles';
 import Tag from './Tag';
 
@@ -12,17 +13,11 @@ const NewTagControls = styled.form`
 	grid-gap: 20px;
 	margin-bottom: 20px;
 `;
-const SubmitButton = styled.button`
+const SubmitButton = styled(ColloredButton)`
 	border: 1px solid var(--positive);
 	border-radius: 10px;
 	padding: 10px;
 	color: var(--text-color);
-
-	&:hover,
-	&:focus {
-		color: white;
-		background-color: var(--positive);
-	}
 `;
 
 type Props = {
@@ -63,7 +58,9 @@ const TagsSection: React.FC<Props> = ({ onCreated, onRemoved, tags }) => {
 					value={newTag}
 					onChange={setNewTag}
 				/>
-				<SubmitButton type='submit'>Добавить</SubmitButton>
+				<SubmitButton color='var(--positive)' type='submit'>
+					Добавить
+				</SubmitButton>
 			</NewTagControls>
 			<TagsContainer>
 				{tags.map((tag) => (

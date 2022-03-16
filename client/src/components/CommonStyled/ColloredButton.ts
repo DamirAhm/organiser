@@ -5,12 +5,13 @@ export const ColloredButton = styled.button<{ color: string }>`
 
 	& > * {
 		fill: ${({ color }) => color};
+		background-color: transparent;
 	}
 
 	&:hover,
 	&:focus {
 		background-color: ${({ color }) => color};
-
+		color: white;
 		svg {
 			fill: white;
 		}

@@ -1,102 +1,131 @@
-import React from 'react';
-import ReactModal from 'react-modal';
-import { Note } from '../../../../../types';
-import Input from '../../../../Common/Input';
-import { StyledReactModal, HeaderTitle, PoleName } from './NoteModalsStyles';
-import Textarea from '../../../../Common/TextArea';
-import TagsSection from './TagsSection';
+import React, { useCallback, useState } from 'react';
+import { HeaderTitle, PoleName, TagsContainer } from './NoteModalsStyles';
 import styled from 'styled-components';
 import Tag from './Tag';
 import { useQuery } from 'react-query';
-import getNote, {
+import getNoteQuery, {
 	getNoteType,
 	GET_NOTE,
 } from '../../../../../api/Queries/getNote';
 import useAuthToken from '../../../../../hooks/useAuthToken';
 import { LoaderPage } from '../../../LoaderPage';
-import useEscape from '../../../../../hooks/useEscape';
-import { useNavigate } from 'react-router-dom';
+import { GoTrashcan, GoPencil } from 'react-icons/go';
+import { ColloredButton } from '../../../../CommonStyled';
+import { NewNote, Note } from '../../../../../types';
+import NoteEditingModalContent from './NoteEditingModal';
+import { replaceHrefsByAnchors } from '../../../../../utils/replaceHrefsByAnchors';
 
-const InputContainer = styled.div`
-	width: min(80%, 240px);
-`;
-
-const TextAreaContainer = styled.div`
-	width: min(80%, 360px);
-	height: 120px;
-`;
-
-const CreationControls = styled.div`
-	margin-top: auto;
-	width: 100%;
-	display: flex;
-	justify-content: space-around;
-`;
-
-const ControlButton = styled.button<{ color: string }>`
-	padding: 10px;
+const Description = styled.span`
 	font-size: 1.2rem;
-	border: 1px solid ${({ color }) => color};
-	border-radius: 10px;
-	color: var(--text-color);
+`;
 
-	&:hover,
-	&:focus {
-		background-color: ${({ color }) => color};
-		color: white;
+const NoteModalHeader = styled.div`
+	width: 100%;
+	display: grid;
+	grid-template-columns: 100px 1fr 100px;
+
+	& ${HeaderTitle} {
+		grid-column: 2;
 	}
+`;
+
+const HeaderControls = styled.div`
+	grid-column: 3;
+	display: grid;
+	grid-template-columns: 40px 40px;
+	grid-gap: 20px;
+`;
+
+const HeaderButton = styled(ColloredButton)`
+	border-radius: 50%;
 `;
 
 type Props = {
 	noteId: string;
+	deleteNote: () => void;
+	changeNote: (changedNote: NewNote, noteId: string) => void;
 };
 
-const NoteModal: React.FC<Props> = ({ noteId }) => {
-	const navigate = useNavigate();
-
+const NoteModalContent: React.FC<Props> = ({
+	noteId,
+	changeNote,
+	deleteNote,
+}) => {
 	const { authToken } = useAuthToken();
 	const { data, isLoading } = useQuery<getNoteType>([GET_NOTE, noteId], () =>
-		getNote(authToken, noteId)
+		getNoteQuery(authToken, noteId)
 	);
 
-	useEscape(() => {
-		navigate('../');
-	});
+	const [isChanging, setIsChanging] = useState(false);
+
+	const confirmChange = useCallback(
+		(changedNote: NewNote) => {
+			setIsChanging(false);
+			changeNote(changedNote, noteId);
+		},
+		[setIsChanging, changeNote, noteId]
+	);
+
+	const descriptionWithReplacedHrefs = data
+		? replaceHrefsByAnchors(data.description)
+		: [];
 
 	return (
-		<StyledReactModal
-			as={ReactModal}
-			isOpen={true}
-			style={{
-				overlay: {
-					backgroundColor: 'rgba(0,0,0,0.5)',
-					display: 'flex',
-					alignItems: 'center',
-					justifyContent: 'center',
-				},
-			}}
-		>
+		<>
 			{isLoading ? (
 				<LoaderPage imbedded />
 			) : (
 				<>
-					{data && (
-						<>
-							<HeaderTitle>{data.title}</HeaderTitle>
-							<PoleName>Описание</PoleName>
-							<span>{data.description}</span>
-							<PoleName>Теги</PoleName>
-							{data.tags.map((tag) => (
-								<Tag name={tag} onRemove={() => {}} /> //TODO remove onRemove
-							))}
-							<PoleName>Файлы</PoleName>
-							<span>В разработке....</span>
-						</>
-					)}
+					{data &&
+						(!isChanging ? (
+							<>
+								<NoteModalHeader>
+									<HeaderTitle>{data.title}</HeaderTitle>
+									<HeaderControls>
+										<HeaderButton
+											onClick={() => setIsChanging(true)}
+											color='var(--border-color)'
+										>
+											<GoPencil size={30} />
+										</HeaderButton>
+										<HeaderButton
+											color='var(--negative)'
+											onClick={deleteNote}
+										>
+											<GoTrashcan
+												size={30}
+												viewBox='0 0 13 16'
+											/>
+										</HeaderButton>
+									</HeaderControls>
+								</NoteModalHeader>
+								<TagsContainer>
+									{data.tags.map((tag) => (
+										<Tag
+											key={tag}
+											name={tag}
+											removable={false}
+										/>
+									))}
+								</TagsContainer>
+								<hr />
+								<Description>
+									{descriptionWithReplacedHrefs}
+								</Description>
+								<PoleName>Файлы</PoleName>
+								<span>В разработке....</span>
+							</>
+						) : (
+							<NoteEditingModalContent
+								onFilled={confirmChange}
+								onRejected={() => setIsChanging(false)}
+								initialState={data}
+							/>
+						))}
 				</>
 			)}
-		</StyledReactModal>
+		</>
 	);
 };
 
-export default NoteModal;
+export default NoteModalContent;

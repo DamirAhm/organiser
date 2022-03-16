@@ -3,18 +3,18 @@ import { useMutation, useQuery, useQueryClient } from 'react-query';
 import styled from 'styled-components';
 import useAuthToken from '../../../../hooks/useAuthToken';
 import { useOpenedSection } from '../../../../hooks/useOpenedSection';
-import createSection, {
+import createSectionMutation, {
 	createSectionArgs,
 	createSectionType,
 } from '../../../../api/Mutations/createSection';
-import getSectionsList, {
+import getSectionsListQuery, {
 	getSectionsListType,
 	GET_SECTIONS_LIST,
 } from '../../../../api/Queries/getSectionsList';
 import { SectionPreview } from '../../../../types';
 import SectionNote from './SectionItem';
 import SectionNamingElement from './SectionNamingItem';
-import renameSection, {
+import renameSectionMutation, {
 	renameSectionArgs,
 	renameSectionType,
 } from '../../../../api/Mutations/renameSection';
@@ -45,9 +45,10 @@ const SectionsList: React.FC<Props> = ({
 }) => {
 	const { authToken } = useAuthToken();
 	const { setOpenedSectionId, openedSectionId } = useOpenedSection();
+
 	const { data: sectionsData } = useQuery<getSectionsListType>(
 		GET_SECTIONS_LIST,
-		() => getSectionsList(authToken)
+		() => getSectionsListQuery(authToken)
 	);
 
 	const queryClient = useQueryClient();
@@ -55,7 +56,7 @@ const SectionsList: React.FC<Props> = ({
 		createSectionType,
 		{},
 		createSectionArgs
-	>(createSection, {
+	>(createSectionMutation, {
 		onMutate: ({ name }) => {
 			queryClient.cancelQueries(GET_SECTIONS_LIST);
 
@@ -79,13 +80,34 @@ const SectionsList: React.FC<Props> = ({
 			return () =>
 				queryClient.setQueryData(GET_SECTIONS_LIST, previousTodos);
 		},
+		onSuccess: (newSectionData) => {
+			if (newSectionData) {
+				const { name, id: sectionId, pinned } = newSectionData;
+
+				queryClient.cancelQueries(GET_SECTIONS_LIST);
+
+				queryClient.setQueryData<getSectionsListType>(
+					GET_SECTIONS_LIST,
+					(oldSectionsList) => {
+						if (oldSectionsList) {
+							return oldSectionsList.map((section) =>
+								section.name === name
+									? { name, id: sectionId, pinned }
+									: section
+							);
+						}
+						return [];
+					}
+				);
+			}
+		},
 	});
 
 	const { mutateAsync: renameAsync } = useMutation<
 		renameSectionType,
 		{},
 		renameSectionArgs
-	>(renameSection, {
+	>(renameSectionMutation, {
 		onMutate: ({ sectionId, name }) => {
 			queryClient.cancelQueries(GET_SECTIONS_LIST);
 
@@ -109,36 +131,25 @@ const SectionsList: React.FC<Props> = ({
 			return () =>
 				queryClient.setQueryData(GET_SECTIONS_LIST, SectionsListBackup);
 		},
-		onSuccess: (newSectionData) => {
-			if (newSectionData) {
-				const { name, id: sectionId, pinned } = newSectionData;
-
-				queryClient.cancelQueries(GET_SECTIONS_LIST);
-
-				queryClient.setQueryData<getSectionsListType>(
-					GET_SECTIONS_LIST,
-					(oldSectionsList) => {
-						if (oldSectionsList) {
-							return oldSectionsList.map((section) =>
-								section.id === sectionId
-									? { name, id: sectionId, pinned }
-									: section
-							);
-						}
-						return [];
-					}
-				);
-			}
-		},
 	});
 
 	const rename = useCallback(
 		(sectionId: string, name: string, previousName: string) => {
-			if (openedSectionId !== null) {
-				stopEditing();
-				if (previousName !== sectionId) {
-					renameAsync({ authToken, sectionId, name });
-				}
+			if (name.trim() === '') {
+				alert('Название секции не должно быть пустым');
+				return;
+			} else if (
+				sectionsData?.some(
+					({ name: sectionName }) => sectionName === name
+				)
+			) {
+				alert('Названия секций должны быть уникальны');
+				return;
+			}
+
+			stopEditing();
+			if (previousName !== sectionId) {
+				renameAsync({ authToken, sectionId, name });
 			}
 		},
 		[stopEditing, renameAsync, authToken, openedSectionId]
@@ -153,6 +164,14 @@ const SectionsList: React.FC<Props> = ({
 		async (name: string) => {
 			if (name.trim() === '') {
 				alert('Название не должно быть пустой строкой');
+				return;
+			} else if (
+				sectionsData?.some(
+					({ name: sectionName }) => sectionName === name
+				)
+			) {
+				alert('Названия секций не должны совпадать');
+				return;
 			}
 
 			stopCreating();
@@ -162,7 +181,7 @@ const SectionsList: React.FC<Props> = ({
 				onNewSectionCreated(newSection.id);
 			}
 		},
-		[authToken, createAsync]
+		[authToken, createAsync, sectionsData]
 	);
 
 	//If opened section got deleted navigates to first section in the list
@@ -184,7 +203,7 @@ const SectionsList: React.FC<Props> = ({
 			{sectionsData && (
 				<>
 					{sectionsData.map((section) => (
-						<Fragment key={section.id}>
+						<Fragment key={section.name}>
 							{section.id === editableSection ? (
 								<SectionNamingElement
 									defaultValue={section.name}

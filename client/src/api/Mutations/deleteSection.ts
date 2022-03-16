@@ -11,7 +11,7 @@ export type deleteSectionArgs = {
 	sectionId: string;
 };
 
-export default async function deleteSection({
+export default async function deleteSectionMutation({
 	authToken,
 	sectionId,
 }: deleteSectionArgs): Promise<deleteSectionType> {

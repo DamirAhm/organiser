@@ -14,7 +14,7 @@ export type createNoteArgs = {
 	section?: string;
 };
 
-export default async function createSection({
+export default async function createNoteMutation({
 	authToken,
 	newNoteData,
 	parent,

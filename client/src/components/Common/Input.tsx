@@ -35,7 +35,7 @@ const InputContainer = styled.div`
 
 const StyledInput = styled.input`
 	box-shadow: 0px 1px 2px -1px black;
-	padding: calc(10px - 0.3rem / 2) 15px;
+	padding: 10px 15px;
 	border-radius: 10px;
 	height: 100%;
 	color: var(--main);
@@ -45,13 +45,6 @@ const StyledInput = styled.input`
 `;
 
 const Input: React.FC<Props> = ({ onChange, value, ...props }) => {
-	const InputRef = useRef<HTMLInputElement>(null);
-
-	const clear = useCallback(() => {
-		onChange('');
-		InputRef.current?.focus();
-	}, [InputRef]);
-
 	const changeHandler = useCallback(
 		(e: React.ChangeEvent<HTMLInputElement>) => {
 			onChange(e.target.value);
@@ -62,15 +55,11 @@ const Input: React.FC<Props> = ({ onChange, value, ...props }) => {
 	return (
 		<InputContainer onClick={(e) => e.stopPropagation()}>
 			<StyledInput
-				ref={InputRef}
 				type='text'
 				value={value}
 				onChange={changeHandler}
 				{...props}
 			/>
-			<ClearButton tabIndex={0} onClick={clear}>
-				<MdClose color='var(--negative)' size={18} />
-			</ClearButton>
 		</InputContainer>
 	);
 };

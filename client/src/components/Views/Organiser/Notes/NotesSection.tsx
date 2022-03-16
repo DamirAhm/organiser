@@ -3,7 +3,10 @@ import { useQuery } from 'react-query';
 import styled from 'styled-components';
 import useAuthToken from '../../../../hooks/useAuthToken';
 import { useOpenedSection } from '../../../../hooks/useOpenedSection';
-import getSection, { GET_SECTION } from '../../../../api/Queries/getSection';
+import getSectionQuery, {
+	getSectionType,
+	GET_SECTION,
+} from '../../../../api/Queries/getSection';
 import Filters from '../../../Common/Filters';
 import Notes from './Notes';
 import { LoaderPage } from '../../LoaderPage';
@@ -30,8 +33,9 @@ const NotesSection: React.FC<Props> = ({}) => {
 	const { openedSectionId } = useOpenedSection();
 	const { authToken } = useAuthToken();
 
-	const sectionData = useQuery([GET_SECTION, openedSectionId], () =>
-		getSection(authToken, openedSectionId!)
+	const { data: sectionData } = useQuery<getSectionType>(
+		[GET_SECTION, openedSectionId],
+		() => getSectionQuery(authToken, openedSectionId!)
 	);
 
 	const [search, setSearch] = useState('');
@@ -41,9 +45,9 @@ const NotesSection: React.FC<Props> = ({}) => {
 
 	return (
 		<ContentContainer>
-			{sectionData && sectionData?.data && (
+			{sectionData && (
 				<>
-					<Title>{sectionData.data.name}</Title>
+					<Title>{sectionData.name}</Title>
 					<FiltersWrapper
 						as={Filters}
 						onSearchChange={setSearch}

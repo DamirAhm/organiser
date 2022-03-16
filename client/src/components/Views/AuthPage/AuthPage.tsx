@@ -4,6 +4,11 @@ import styled from 'styled-components';
 import useAuthToken from '../../../hooks/useAuthToken';
 import { useNavigate } from 'react-router-dom';
 import { FcGoogle } from 'react-icons/fc';
+import { useQueryClient } from 'react-query';
+import getSectionsListQuery, {
+	GET_SECTIONS_LIST,
+} from '../../../api/Queries/getSectionsList';
+import getUserQuery, { GET_USER } from '../../../api/Queries/getUser';
 
 const AuthContainer = styled.div`
 	width: min(100%, 1400px);
@@ -30,11 +35,22 @@ const AuthLink = styled.a`
 `;
 
 const Auth: React.FC = () => {
-	const { authorized } = useAuthToken();
+	const queryClient = useQueryClient();
+	const { authorized, authToken } = useAuthToken();
 	const navigate = useNavigate();
 
 	useEffect(() => {
-		if (authorized) navigate('../');
+		if (authorized) {
+			navigate('../');
+			queryClient.prefetchQuery({
+				queryKey: GET_USER,
+				queryFn: () => getUserQuery(authToken),
+			});
+			queryClient.prefetchQuery({
+				queryKey: GET_SECTIONS_LIST,
+				queryFn: () => getSectionsListQuery(authToken),
+			});
+		}
 	}, [authorized]);
 
 	return (

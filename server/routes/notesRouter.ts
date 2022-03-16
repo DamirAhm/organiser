@@ -67,7 +67,9 @@ notesRouter.post('/', auth.required, (req, res, next) => {
 				await parentSection.save();
 			}
 
-			return res.json({ payload: newNote });
+			return res.json({
+				payload: { ...newNote.toJSON(), id: newNote.id },
+			});
 		} catch (e) {
 			if (e instanceof Error) {
 				res.status(STATUS_CODES.BAD).json({ error: e.message });

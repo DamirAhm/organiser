@@ -17,7 +17,7 @@ export const useOpenedSection = (): useOpenedSectionType => {
 
 	const match = useMatch('/:sectionId/*');
 
-	const openedSectionId = match?.params?.sectionId || null;
+	const openedSectionId = match?.params.sectionId || null;
 
 	return {
 		openedSectionId,

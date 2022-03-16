@@ -11,7 +11,7 @@ export type createSectionArgs = {
 	name: string;
 };
 
-export default async function createSection({
+export default async function createSectionMutation({
 	authToken,
 	name,
 }: createSectionArgs): Promise<createSectionType> {

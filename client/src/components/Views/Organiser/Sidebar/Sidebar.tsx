@@ -2,7 +2,7 @@ import React, { Suspense, useCallback, useState } from 'react';
 import styled from 'styled-components';
 import { useQuery } from 'react-query';
 
-import getUser, {
+import getUserQuery, {
 	getUserType,
 	GET_USER,
 } from '../../../../api/Queries/getUser';
@@ -32,7 +32,7 @@ const Sidebar: React.FC<Props> = ({}) => {
 
 	const { isFetching: isFetchingUser, data: user } = useQuery<getUserType>(
 		GET_USER,
-		() => getUser(authToken),
+		() => getUserQuery(authToken),
 		{
 			staleTime: Infinity,
 		}

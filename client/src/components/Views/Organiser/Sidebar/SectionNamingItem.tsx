@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
+import Input from '../../../Common/Input';
 
 const SectionNamingNoteContainer = styled.label`
 	padding: 20px;
@@ -55,12 +56,12 @@ const SectionNamingElement: React.FC<Props> = ({
 			onClick={(e: React.MouseEvent) => e.stopPropagation()}
 		>
 			<form onSubmit={handleEnterPress}>
-				<input
+				<Input
 					type='text'
 					placeholder='Введите название'
 					autoFocus
 					value={name}
-					onChange={(e) => setName(e.target.value)}
+					onChange={setName}
 				/>
 			</form>
 		</SectionNamingNoteContainer>

@@ -8,7 +8,7 @@ export const GET_NOTE = 'getNote';
 export type getNoteType = Note | null;
 type getNoteDataType = { payload: Note | null };
 
-export default async function getNote(
+export default async function getNoteQuery(
 	authToken: string | null,
 	noteId: string
 ): Promise<getNoteType> {

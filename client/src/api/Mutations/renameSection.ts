@@ -12,7 +12,7 @@ export type renameSectionArgs = {
 	name: string;
 };
 
-export default async function renameSection({
+export default async function renameSectionMutation({
 	authToken,
 	sectionId,
 	name,

@@ -6,7 +6,7 @@ export const GET_AUTHORIZED = 'getAutorized';
 
 export type getAuthorizedDataType = { payload: boolean };
 
-export default async function getAuthorized(
+export default async function getAuthorizedQuery(
 	authToken: string | null
 ): Promise<boolean> {
 	const data = await axios

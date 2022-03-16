@@ -1,22 +1,37 @@
 import React, { useCallback, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from 'react-query';
+import { Route, Routes } from 'react-router-dom';
 import styled from 'styled-components';
 import { GoPlus } from 'react-icons/go';
-import getNotesList, {
-	getNotesType,
-	GET_NOTES,
-} from '../../../../api/Queries/getNotesList';
-import { useMutation, useQuery, useQueryClient } from 'react-query';
+
 import { useOpenedSection } from '../../../../hooks/useOpenedSection';
 import useAuthToken from '../../../../hooks/useAuthToken';
-import createNote, {
+
+import NoteEditingModalWrapper from './Note/NoteEditingModalWrapper';
+import { NewNote } from '../../../../types';
+import NoteElement, { NoteContainer } from './NoteElement';
+import NoteModalWrapper from './Note/NoteModalWrapper';
+
+import getNotesListQuery, {
+	getNotesType,
+	GET_NOTES_LIST,
+} from '../../../../api/Queries/getNotesList';
+
+import deleteNoteMutation, {
+	deleteNoteArgs,
+	deleteNoteType,
+} from '../../../../api/Mutations/deleteNote';
+import createNoteMutation, {
 	createNoteArgs,
 	createNoteType,
 } from '../../../../api/Mutations/createNote';
-import NoteEditingModal from './Note/NoteEditingModal';
-import { NewNote } from '../../../../types';
-import NoteElement, { NoteContainer } from './NoteElement';
-import { Route, Routes } from 'react-router-dom';
-import NoteModalWrapper from './Note/NoteModalWrapper';
+import { LoaderPage } from '../../LoaderPage';
+import { useOpenedNote } from '../../../../hooks/useOpenedNote';
+import changeNoteMutation, {
+	changeNoteArgs,
+	changeNoteType,
+} from '../../../../api/Mutations/changeNote';
+import { getNoteType, GET_NOTE } from '../../../../api/Queries/getNote';
 
 const NotesContainer = styled.div`
 	background-color: #eef;
@@ -70,51 +85,62 @@ const NotesWrapper = styled.div`
 type Props = {};
 
 const Notes: React.FC<Props> = ({}) => {
+	const { closeOpenedNote, openedNoteId } = useOpenedNote();
 	const { authToken } = useAuthToken();
 	const { openedSectionId } = useOpenedSection();
 
 	const [isCreating, setIsCreating] = useState(false);
 
 	const queryClient = useQueryClient();
-	const { data } = useQuery(GET_NOTES, () =>
-		getNotesList(authToken, openedSectionId!)
+	const { data: notesData } = useQuery(
+		[GET_NOTES_LIST, openedSectionId],
+		() => getNotesListQuery(authToken, openedSectionId!)
 	);
 
 	const { mutateAsync: createNoteAsync } = useMutation<
 		createNoteType,
 		unknown,
 		createNoteArgs
-	>(createNote, {
+	>(createNoteMutation, {
 		onMutate: ({ newNoteData }) => {
-			queryClient.cancelQueries(GET_NOTES);
+			queryClient.cancelQueries([GET_NOTES_LIST, openedSectionId]);
 
-			const notesBackup =
-				queryClient.getQueryData<getNotesType>(GET_NOTES);
+			const notesBackup = queryClient.getQueryData<getNotesType>([
+				GET_NOTES_LIST,
+				openedSectionId,
+			]);
 
-			queryClient.setQueryData<getNotesType>(GET_NOTES, (oldNotes) => {
-				return [
-					...(oldNotes || []),
-					{
-						title: newNoteData.title,
-						id: `placeholder-${Date.now()}`,
-						pinned: false,
-					},
-				];
-			});
+			queryClient.setQueryData<getNotesType>(
+				[GET_NOTES_LIST, openedSectionId],
+				(oldNotes) => {
+					return [
+						...(oldNotes ?? []),
+						{
+							title: newNoteData.title,
+							id: `placeholder-${Date.now()}`,
+							pinned: false,
+						},
+					];
+				}
+			);
 
-			return () => queryClient.setQueryData(GET_NOTES, notesBackup);
+			return () =>
+				queryClient.setQueryData(
+					[GET_NOTES_LIST, openedSectionId],
+					notesBackup
+				);
 		},
 		onSuccess: (newNoteData) => {
 			if (newNoteData !== null) {
 				const { title, id: noteId, pinned } = newNoteData;
-				queryClient.cancelQueries(GET_NOTES);
+				queryClient.cancelQueries([GET_NOTES_LIST, openedSectionId]);
 
 				queryClient.setQueryData<getNotesType>(
-					GET_NOTES,
+					[GET_NOTES_LIST, openedSectionId],
 					(oldNotes) => {
 						if (oldNotes) {
 							return oldNotes.map((note) =>
-								note.id === newNoteData?.id
+								note.title === title
 									? { title, id: noteId, pinned }
 									: note
 							);
@@ -126,12 +152,93 @@ const Notes: React.FC<Props> = ({}) => {
 		},
 	});
 
+	const { mutateAsync: changeNoteAsync } = useMutation<
+		changeNoteType,
+		unknown,
+		changeNoteArgs
+	>(changeNoteMutation, {
+		onMutate: ({ noteId, noteUpdate }) => {
+			queryClient.cancelQueries([GET_NOTES_LIST, openedSectionId]);
+			queryClient.cancelQueries([GET_NOTE, noteId]);
+
+			const notesListBackup = queryClient.getQueryData([
+				GET_NOTES_LIST,
+				openedSectionId,
+			]);
+			const noteBackup = queryClient.getQueryData([GET_NOTE, noteId]);
+
+			queryClient.setQueryData<getNotesType>(
+				[GET_NOTES_LIST, openedSectionId],
+				(oldNotesList) => {
+					return oldNotesList
+						? oldNotesList.map((note) =>
+								note.id === noteId
+									? {
+											...note,
+											title:
+												noteUpdate.title ?? note.title,
+									  }
+									: note
+						  )
+						: [];
+				}
+			);
+			queryClient.setQueryData<getNoteType>(
+				[GET_NOTE, noteId],
+				(oldNote) => (oldNote ? { ...oldNote, ...noteUpdate } : null)
+			);
+
+			return () => {
+				queryClient.setQueryData(
+					[GET_NOTES_LIST, openedSectionId],
+					notesListBackup
+				);
+				queryClient.setQueryData([GET_NOTE, noteId], noteBackup);
+			};
+		},
+	});
+
+	const { mutateAsync: deleteNoteAsync } = useMutation<
+		deleteNoteType,
+		unknown,
+		deleteNoteArgs
+	>(deleteNoteMutation, {
+		onMutate: ({ noteId }) => {
+			queryClient.cancelQueries([GET_NOTES_LIST, openedSectionId]);
+			const queriesListBackup = queryClient.getQueryData<getNotesType>([
+				GET_NOTES_LIST,
+				openedSectionId,
+			]);
+			queryClient.setQueryData<getNotesType>(
+				[GET_NOTES_LIST, openedSectionId],
+				(oldQueryList) =>
+					oldQueryList?.filter(({ id }) => id !== noteId) ?? []
+			);
+			return () =>
+				queryClient.setQueryData(
+					[GET_NOTES_LIST, openedSectionId],
+					() => queriesListBackup
+				);
+		},
+	});
+
 	const stopCreating = useCallback(
 		() => setIsCreating(false),
 		[setIsCreating]
 	);
-	const create = useCallback(
+
+	const createNote = useCallback(
 		(newNote: NewNote) => {
+			if (newNote.title.trim() === '') {
+				alert('Заголовок не должен быть пустым');
+				return;
+			} else if (
+				notesData?.some(({ title }) => title === newNote.title)
+			) {
+				alert('Заголовок должен быть уникальным');
+				return;
+			}
+
 			stopCreating();
 			createNoteAsync({
 				authToken: authToken!,
@@ -139,7 +246,27 @@ const Notes: React.FC<Props> = ({}) => {
 				section: openedSectionId!,
 			});
 		},
-		[createNoteAsync, authToken, stopCreating]
+		[createNoteAsync, authToken, stopCreating, openedSectionId]
+	);
+
+	const changeNote = useCallback(
+		(noteUpdate: NewNote, noteId: string) => {
+			changeNoteAsync({ authToken: authToken!, noteUpdate, noteId });
+		},
+		[changeNoteAsync, authToken]
+	);
+
+	const deleteNote = useCallback(
+		(noteId: string) => {
+			if (openedNoteId !== null) {
+				closeOpenedNote();
+			}
+			deleteNoteAsync({
+				authToken,
+				noteId,
+			});
+		},
+		[deleteNoteAsync, authToken, openedNoteId, closeOpenedNote]
 	);
 
 	return (
@@ -149,21 +276,37 @@ const Notes: React.FC<Props> = ({}) => {
 					Создать <GoPlus color='var(--border-color)' size={20} />
 				</AddButton>
 			)}
-			{data && (
+			{notesData ? (
 				<NotesWrapper>
-					{data.map((note) => (
-						<NoteElement key={note.title} {...note}></NoteElement>
+					{notesData.map((note) => (
+						<NoteElement
+							onDeleteRequest={deleteNote}
+							key={note.title}
+							{...note}
+						></NoteElement>
 					))}
 				</NotesWrapper>
+			) : (
+				<LoaderPage imbedded />
 			)}
-			{/* //TODO открывать подробности заметки в роуте */}
-			{/* <Route path=':noteId' element={NoteModal} /> */}
+
 			{isCreating && (
-				<NoteEditingModal onFilled={create} onRejected={stopCreating} />
+				<NoteEditingModalWrapper
+					onFilled={createNote}
+					onRejected={stopCreating}
+				/>
 			)}
 
 			<Routes>
-				<Route path=':noteId' element={<NoteModalWrapper />} />
+				<Route
+					path=':noteId'
+					element={
+						<NoteModalWrapper
+							deleteNote={deleteNote}
+							changeNote={changeNote}
+						/>
+					}
+				/>
 			</Routes>
 		</NotesContainer>
 	);

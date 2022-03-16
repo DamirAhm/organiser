@@ -6,7 +6,7 @@ import headersWithAuth from '../../utils/headersWithAuth';
 export type getUserType = User;
 type getUserDataType = { payload: User };
 
-export default async function getUser(
+export default async function getUserQuery(
 	authToken: string | null
 ): Promise<getUserType> {
 	const data = await axios

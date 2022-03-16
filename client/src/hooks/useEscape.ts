@@ -1,6 +1,9 @@
 import { useCallback, useEffect } from 'react';
 
-const useEscape = (cb: () => void) => {
+const useEscape = (
+	cb: () => void,
+	captureElement: HTMLElement = document.body
+) => {
 	//On key press checks whether pressed Escape or not
 	const onKeyPressed = useCallback(
 		(e: KeyboardEvent) => {
@@ -12,12 +15,12 @@ const useEscape = (cb: () => void) => {
 	);
 	//Add event listener to Escape press
 	useEffect(() => {
-		document.addEventListener('keydown', onKeyPressed);
+		captureElement.addEventListener('keydown', onKeyPressed);
 
 		return () => {
-			document.removeEventListener('keydown', onKeyPressed);
+			captureElement.removeEventListener('keydown', onKeyPressed);
 		};
-	}, []);
+	}, [onKeyPressed]);
 };
 
 export default useEscape;

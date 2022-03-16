@@ -10,6 +10,7 @@ import NoteEditingReducer, {
 import Textarea from '../../../../Common/TextArea';
 import TagsSection from './TagsSection';
 import styled from 'styled-components';
+import { ColloredButton } from '../../../../CommonStyled';
 
 const InputContainer = styled.div`
 	width: min(80%, 240px);
@@ -27,34 +28,35 @@ const CreationControls = styled.div`
 	justify-content: space-around;
 `;
 
-const ControlButton = styled.button<{ color: string }>`
+const ControlButton = styled(ColloredButton)`
 	padding: 10px;
 	font-size: 1.2rem;
 	border: 1px solid ${({ color }) => color};
 	border-radius: 10px;
 	color: var(--text-color);
-
-	&:hover,
-	&:focus {
-		background-color: ${({ color }) => color};
-		color: white;
-	}
 `;
 
 type Props = {
 	onFilled: (newNote: NewNote) => void;
 	onRejected: () => void;
+	initialState?: NewNote;
+	confirmButtonName?: string;
 };
 
 //TODO сохранять прошлый стейт в LocalStorage
-const NoteEditingModal: React.FC<Props> = ({ onFilled, onRejected }) => {
+const NoteEditingModalContent: React.FC<Props> = ({
+	onFilled,
+	onRejected,
+	initialState,
+	confirmButtonName = 'Изменить',
+}) => {
 	const [newNote, dispatch] = useReducer<React.Reducer<NewNote, ActionType>>(
 		NoteEditingReducer,
 		{
-			title: '',
-			description: '',
-			tags: [],
-			files: [],
+			title: initialState?.title ?? '',
+			description: initialState?.description ?? '',
+			tags: initialState?.tags ?? [],
+			files: initialState?.files ?? [],
 		}
 	);
 
@@ -68,22 +70,12 @@ const NoteEditingModal: React.FC<Props> = ({ onFilled, onRejected }) => {
 	}, [newNote, onFilled]);
 
 	return (
-		<StyledReactModal
-			as={ReactModal}
-			isOpen={true}
-			style={{
-				overlay: {
-					backgroundColor: 'rgba(0,0,0,0.5)',
-					display: 'flex',
-					alignItems: 'center',
-					justifyContent: 'center',
-				},
-			}}
-		>
+		<>
 			<HeaderTitle>Заполните поля для создания заметки</HeaderTitle>
 			<PoleName>Заголовок</PoleName>
 			<InputContainer>
 				<Input
+					autoFocus
 					value={newNote.title}
 					placeholder='Введите заголовок'
 					onChange={(newTitle) =>
@@ -131,11 +123,11 @@ const NoteEditingModal: React.FC<Props> = ({ onFilled, onRejected }) => {
 					Отмена
 				</ControlButton>
 				<ControlButton color='var(--positive)' onClick={confirm}>
-					Создать
+					{confirmButtonName}
 				</ControlButton>
 			</CreationControls>
-		</StyledReactModal>
+		</>
 	);
 };
 
-export default NoteEditingModal;
+export default NoteEditingModalContent;

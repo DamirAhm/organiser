@@ -95,7 +95,7 @@ const SidebarFooter: React.FC<Props> = ({
 				<div></div>
 			)}
 			<FooterButton color='var(--negative)' onClick={deleteSection}>
-				<GoTrashcan size={30} />
+				<GoTrashcan size={30} viewBox='0 0 13 16' />
 			</FooterButton>
 		</SidebarFooterContainer>
 	);

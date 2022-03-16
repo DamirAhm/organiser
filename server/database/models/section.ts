@@ -5,6 +5,7 @@ const SectionSchema = new Schema<SectionDocument>({
 	name: {
 		type: String,
 		required: true,
+		unique: true,
 	},
 	pinned: {
 		type: Boolean,

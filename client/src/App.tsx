@@ -3,12 +3,14 @@ import { Route, Routes, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from 'react-query';
 import styled from 'styled-components';
 
-import getAuthorized, { GET_AUTHORIZED } from './api/Queries/getAuthorized';
+import getAuthorizedQuery, {
+	GET_AUTHORIZED,
+} from './api/Queries/getAuthorized';
 import { AuthContextProvider, authToken } from './Contexts/AuthContext';
 import { LoaderPage } from './components/Views/LoaderPage';
-import getUser, { GET_USER } from './api/Queries/getUser';
-import getSection, { GET_SECTION } from './api/Queries/getSection';
-import getSectionsList, {
+import getUserQuery, { GET_USER } from './api/Queries/getUser';
+import getSectionQuery, { GET_SECTION } from './api/Queries/getSection';
+import getSectionsListQuery, {
 	GET_SECTIONS_LIST,
 } from './api/Queries/getSectionsList';
 import { sectionId } from './hooks/useOpenedSection';
@@ -35,7 +37,7 @@ function App() {
 	const { isLoading, data: authorized } = useQuery<
 		boolean,
 		{ status: number }
-	>(GET_AUTHORIZED, () => getAuthorized(authToken), {
+	>(GET_AUTHORIZED, () => getAuthorizedQuery(authToken), {
 		staleTime: Infinity,
 	});
 
@@ -46,11 +48,11 @@ function App() {
 			setAuthToken(urlSearchParams.get('auth'));
 			queryClient.prefetchQuery({
 				queryKey: GET_USER,
-				queryFn: () => getUser(authToken),
+				queryFn: () => getUserQuery(authToken),
 			});
 			queryClient.prefetchQuery({
 				queryKey: GET_SECTIONS_LIST,
-				queryFn: () => getSectionsList(authToken),
+				queryFn: () => getSectionsListQuery(authToken),
 			});
 		}
 	}, [hasAuth]);
