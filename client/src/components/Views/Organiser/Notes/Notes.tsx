@@ -82,9 +82,12 @@ const NotesWrapper = styled.div`
 	}
 `;
 
-type Props = {};
+type Props = {
+	search: string;
+	usedTags: string[];
+};
 
-const Notes: React.FC<Props> = ({}) => {
+const Notes: React.FC<Props> = ({ usedTags, search }) => {
 	const { closeOpenedNote, openedNoteId } = useOpenedNote();
 	const { authToken } = useAuthToken();
 	const { openedSectionId } = useOpenedSection();
@@ -285,13 +288,29 @@ const Notes: React.FC<Props> = ({}) => {
 			)}
 			{notesData ? (
 				<NotesWrapper>
-					{notesData.map((note) => (
-						<NoteElement
-							onDeleteRequest={deleteNote}
-							key={note.title}
-							{...note}
-						></NoteElement>
-					))}
+					{notesData
+						.filter((note) =>
+							usedTags.every((usedTag) =>
+								note.tags.some(
+									(tag) =>
+										tag.toLowerCase() ===
+										usedTag.toLowerCase()
+								)
+							)
+						)
+						.filter((note) =>
+							note.title
+								.toLowerCase()
+								.includes(search.toLowerCase())
+						)
+						.map((note) => (
+							<NoteElement
+								onDeleteRequest={deleteNote}
+								search={search}
+								key={note.title}
+								{...note}
+							></NoteElement>
+						))}
 				</NotesWrapper>
 			) : (
 				<LoaderPage imbedded />

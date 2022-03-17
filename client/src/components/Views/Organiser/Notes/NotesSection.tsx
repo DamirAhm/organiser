@@ -16,8 +16,8 @@ type Props = {};
 const ContentContainer = styled.section`
 	padding: 20px;
 	display: grid;
-	grid-template-rows: 40px 40px 1fr;
-	row-gap: 20px;
+	grid-template-rows: 40px auto 1fr;
+	grid-gap: 10px;
 	grid-column: 2;
 	background-color: var(--darken-background-color);
 `;
@@ -39,6 +39,7 @@ const NotesSection: React.FC<Props> = ({}) => {
 	);
 
 	const [search, setSearch] = useState('');
+	const [usedTags, setUsedTags] = useState<string[]>([]);
 	const [sortedBy, setSortedBy] = useState<string | undefined>();
 
 	const options = ['1', '2', '3', '4'];
@@ -52,12 +53,12 @@ const NotesSection: React.FC<Props> = ({}) => {
 						as={Filters}
 						onSearchChange={setSearch}
 						onSortChange={setSortedBy}
-						searchText={search}
 						sortsList={options}
 						defaultSort={sortedBy}
+						onTagsChange={setUsedTags}
 					/>
 					<Suspense fallback={<LoaderPage imbedded />}>
-						<Notes />
+						<Notes search={search} usedTags={usedTags} />
 					</Suspense>
 				</>
 			)}

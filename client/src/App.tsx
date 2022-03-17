@@ -56,7 +56,6 @@ function App() {
 	}, [hasAuth]);
 
 	useEffect(() => {
-		console.log(isLoading, authorized);
 		if (!isLoading) {
 			if (!authorized) navigate('/auth');
 		}

@@ -19,6 +19,8 @@ const RemoveButton = styled.button`
 	align-items: center;
 	margin-left: 10px;
 	outline: none;
+	background-color: transparent;
+	margin-right: -5px;
 
 	&:hover svg,
 	&:focus svg {
@@ -36,7 +38,7 @@ const Tag: React.FC<Props> = ({ name, onRemove }) => {
 		<TagContainer>
 			{name}
 			{onRemove && (
-				<RemoveButton onClick={() => onRemove(name)}>
+				<RemoveButton type='button' onClick={() => onRemove(name)}>
 					<MdClose color={'var(--bold-text-color)'} size={20} />
 				</RemoveButton>
 			)}

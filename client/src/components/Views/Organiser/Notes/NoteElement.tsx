@@ -1,14 +1,15 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import { useQueryClient } from 'react-query';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import getNoteQuery, { GET_NOTE } from '../../../../api/Queries/getNote';
 import useAuthToken from '../../../../hooks/useAuthToken';
 import { NotePreview } from '../../../../types';
-import { GoTrashcan } from 'react-icons/go';
-import { ColloredButton } from '../../../CommonStyled';
 import { TagsContainer } from './Note/NoteModalsStyles';
 import Tag from './Note/Tag';
+import highlightOverlap from '../../../../utils/highlightOverlap';
+import { ColloredButton } from '../../../CommonStyled';
+import { GoTrashcan } from 'react-icons/go';
 
 const CloseButton = styled(ColloredButton)`
 	grid-column: 3;
@@ -22,7 +23,7 @@ const CloseButton = styled(ColloredButton)`
 
 export const NoteContainer = styled.div`
 	display: grid;
-	grid-template-rows: 1fr 2rem;
+	grid-template-rows: 1fr auto;
 	grid-gap: 5px;
 
 	width: 100%;
@@ -67,6 +68,7 @@ export const NoteLink = styled.div`
 
 type Props = {
 	onDeleteRequest: (noteId: string) => void;
+	search: string;
 } & NotePreview;
 
 const NoteElement: React.FC<Props> = ({
@@ -74,6 +76,7 @@ const NoteElement: React.FC<Props> = ({
 	pinned,
 	id,
 	tags,
+	search,
 	onDeleteRequest,
 }) => {
 	const { authToken } = useAuthToken();
@@ -100,6 +103,11 @@ const NoteElement: React.FC<Props> = ({
 		[onDeleteRequest, id]
 	);
 
+	const titleWithHightlight = useMemo(
+		() => highlightOverlap(title, search),
+		[search, title]
+	);
+
 	return (
 		<NoteContainer>
 			<NoteLink
@@ -108,7 +116,7 @@ const NoteElement: React.FC<Props> = ({
 				onMouseEnter={prefetchNote}
 				tabIndex={0}
 			>
-				<span>{title}</span>
+				<span>{titleWithHightlight}</span>
 				<CloseButton
 					color='var(--negative)'
 					onClick={deleteButtonHandler}

@@ -1,12 +1,23 @@
-import React, { HTMLAttributes, SetStateAction, useState } from 'react';
+import React, {
+	HTMLAttributes,
+	SetStateAction,
+	useEffect,
+	useState,
+} from 'react';
 import styled from 'styled-components';
+import useNotesTags from '../../hooks/useNotesTags';
+import { TagsContainer } from '../Views/Organiser/Notes/Note/NoteModalsStyles';
+import Tag from '../Views/Organiser/Notes/Note/Tag';
 
 import Input from './Input';
 import Select from './Select';
 
-const FiltersContainer = styled.div`
-	display: flex;
-	justify-content: space-between;
+const FiltersContainer = styled.form`
+	display: grid;
+	grid-template-columns: 1fr 200px;
+	grid-template-rows: 1fr fit-content;
+	grid-gap: 10px;
+
 	align-items: center;
 	box-sizing: border-box;
 	width: 100%;
@@ -14,15 +25,17 @@ const FiltersContainer = styled.div`
 	& input,
 	& select {
 		border-radius: 10px;
-		/* padding: 5px 10px; */
 		height: 100%;
+		width: 100%;
+	}
+
+	& ${TagsContainer} {
 		width: 100%;
 	}
 `;
 
 const Filter = styled.div`
 	color: var(--main);
-	width: 40%;
 	display: flex;
 	max-width: 250px;
 	min-width: 100px;
@@ -38,12 +51,12 @@ const SelectContainer = styled(Filter)`
 	}
 `;
 
-interface Props extends HTMLAttributes<HTMLDivElement> {
+interface Props extends HTMLAttributes<HTMLFormElement> {
+	defaultSort?: string;
 	sortsList: string[];
 	onSortChange: React.Dispatch<SetStateAction<string | undefined>>;
-	searchText: string;
 	onSearchChange: React.Dispatch<SetStateAction<string>>;
-	defaultSort?: string;
+	onTagsChange: React.Dispatch<SetStateAction<string[]>>;
 	inputProps?: HTMLAttributes<HTMLDivElement>;
 	sortProps?: HTMLAttributes<HTMLDivElement>;
 }
@@ -52,26 +65,70 @@ const Filters: React.FC<Props> = ({
 	sortsList,
 	onSearchChange,
 	onSortChange,
+	onTagsChange,
 	defaultSort,
 	inputProps,
 	sortProps,
 	...props
 }) => {
 	const [text, setText] = useState('');
+	const [usedTags, setUsedTags] = useState<string[]>([]);
+
+	const { tags } = useNotesTags();
 
 	const optionsList = sortsList.map((sort) => ({ value: sort, label: sort }));
 
+	const addTag = () => {
+		debugger;
+		if (text.startsWith('#')) {
+			const tag = text.slice(1);
+
+			if (usedTags.every((usedTag) => usedTag !== tag) && tag != '') {
+				setUsedTags((prev) => [...prev, tag]);
+			}
+			setText('');
+		}
+	};
+	const removeTag = (tagToRemove: string) => {
+		setUsedTags(usedTags.filter((tag) => tag !== tagToRemove));
+	};
+
+	useEffect(() => {
+		onTagsChange(usedTags);
+	}, [usedTags]);
+	useEffect(() => {
+		if (!text.startsWith('#')) {
+			onSearchChange(text);
+		}
+	}, [text]);
+
 	return (
-		<FiltersContainer {...props}>
+		<FiltersContainer
+			{...props}
+			onSubmit={(e) => {
+				e.preventDefault();
+				e.stopPropagation();
+				addTag();
+			}}
+		>
 			<SearchContainer {...inputProps}>
 				<Input
 					onChange={(text: string) => {
 						setText(text);
-						onSearchChange(text);
 					}}
 					placeholder={'Поиск'}
 					value={text}
+					list='tagsSuggestions'
 				/>
+				{text.startsWith('#') && (
+					<datalist id='tagsSuggestions'>
+						{tags.map((tag) => (
+							<option key={tag} value={'#' + tag}>
+								{tag}
+							</option>
+						))}
+					</datalist>
+				)}
 			</SearchContainer>
 			<SelectContainer {...sortProps}>
 				<Select
@@ -81,6 +138,11 @@ const Filters: React.FC<Props> = ({
 					placeholder={'Выбрать'}
 				/>
 			</SelectContainer>
+			<TagsContainer>
+				{usedTags.map((tag) => (
+					<Tag onRemove={() => removeTag(tag)} key={tag} name={tag} />
+				))}
+			</TagsContainer>
 		</FiltersContainer>
 	);
 };
