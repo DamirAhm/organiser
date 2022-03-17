@@ -11,6 +11,7 @@ import Textarea from '../../../../Common/TextArea';
 import TagsSection from './TagsSection';
 import styled from 'styled-components';
 import { ColloredButton } from '../../../../CommonStyled';
+import useNotesTags from '../../../../../hooks/useNotesTags';
 
 const InputContainer = styled.div`
 	width: min(80%, 240px);

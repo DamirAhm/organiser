@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
+import useNotesTags from '../../../../../hooks/useNotesTags';
 import Input from '../../../../Common/Input';
 import { ColloredButton } from '../../../../CommonStyled';
 import { TagsContainer } from './NoteModalsStyles';
@@ -27,6 +28,7 @@ type Props = {
 };
 
 const TagsSection: React.FC<Props> = ({ onCreated, onRemoved, tags }) => {
+	const { tags: usedTags } = useNotesTags();
 	const [newTag, setNewTag] = useState('');
 
 	const create = useCallback(() => {
@@ -57,7 +59,15 @@ const TagsSection: React.FC<Props> = ({ onCreated, onRemoved, tags }) => {
 					placeholder='Новый тег'
 					value={newTag}
 					onChange={setNewTag}
+					list='editingTagsSuggestions'
 				/>
+				<datalist id='editingTagsSuggestions'>
+					{usedTags.map((usedTag) => (
+						<option key={usedTag} value={usedTag}>
+							#{usedTag}
+						</option>
+					))}
+				</datalist>
 				<SubmitButton color='var(--positive)' type='submit'>
 					Добавить
 				</SubmitButton>
