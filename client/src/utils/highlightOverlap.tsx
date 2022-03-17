@@ -23,7 +23,7 @@ const highlightOverlap = (
 
 		return [
 			textStart,
-			<HighlightingElement>{overlap}</HighlightingElement>,
+			<HighlightingElement key={text}>{overlap}</HighlightingElement>,
 			textEnd,
 		];
 	}

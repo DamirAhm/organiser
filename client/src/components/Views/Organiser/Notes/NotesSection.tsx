@@ -10,6 +10,7 @@ import getSectionQuery, {
 import Filters from '../../../Common/Filters';
 import Notes from './Notes';
 import { LoaderPage } from '../../LoaderPage';
+import { useCallback } from 'react';
 
 type Props = {};
 
@@ -27,8 +28,6 @@ const Title = styled.h1`
 	color: var(--bold-text-color);
 `;
 
-const FiltersWrapper = styled.div``;
-
 const NotesSection: React.FC<Props> = ({}) => {
 	const { openedSectionId } = useOpenedSection();
 	const { authToken } = useAuthToken();
@@ -44,21 +43,36 @@ const NotesSection: React.FC<Props> = ({}) => {
 
 	const options = ['1', '2', '3', '4'];
 
+	const toggleTag = useCallback(
+		(tag: string) => {
+			if (usedTags.includes(tag)) {
+				setUsedTags(usedTags.filter((usedTag) => usedTag !== tag));
+			} else {
+				setUsedTags([...usedTags, tag]);
+			}
+		},
+		[usedTags, setUsedTags]
+	);
+
 	return (
 		<ContentContainer>
 			{sectionData && (
 				<>
 					<Title>{sectionData.name}</Title>
-					<FiltersWrapper
-						as={Filters}
+					<Filters
 						onSearchChange={setSearch}
 						onSortChange={setSortedBy}
 						sortsList={options}
 						defaultSort={sortedBy}
 						onTagsChange={setUsedTags}
+						usedTags={usedTags}
 					/>
 					<Suspense fallback={<LoaderPage imbedded />}>
-						<Notes search={search} usedTags={usedTags} />
+						<Notes
+							toggleTag={toggleTag}
+							search={search}
+							usedTags={usedTags}
+						/>
 					</Suspense>
 				</>
 			)}

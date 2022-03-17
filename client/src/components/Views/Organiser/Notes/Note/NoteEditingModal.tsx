@@ -44,7 +44,6 @@ type Props = {
 	confirmButtonName?: string;
 };
 
-//TODO сохранять прошлый стейт в LocalStorage
 const NoteEditingModalContent: React.FC<Props> = ({
 	onFilled,
 	onRejected,

@@ -57,6 +57,7 @@ interface Props extends HTMLAttributes<HTMLFormElement> {
 	onSortChange: React.Dispatch<SetStateAction<string | undefined>>;
 	onSearchChange: React.Dispatch<SetStateAction<string>>;
 	onTagsChange: React.Dispatch<SetStateAction<string[]>>;
+	usedTags: string[];
 	inputProps?: HTMLAttributes<HTMLDivElement>;
 	sortProps?: HTMLAttributes<HTMLDivElement>;
 }
@@ -67,12 +68,12 @@ const Filters: React.FC<Props> = ({
 	onSortChange,
 	onTagsChange,
 	defaultSort,
+	usedTags,
 	inputProps,
 	sortProps,
 	...props
 }) => {
 	const [text, setText] = useState('');
-	const [usedTags, setUsedTags] = useState<string[]>([]);
 
 	const { tags } = useNotesTags();
 
@@ -84,18 +85,15 @@ const Filters: React.FC<Props> = ({
 			const tag = text.slice(1);
 
 			if (usedTags.every((usedTag) => usedTag !== tag) && tag != '') {
-				setUsedTags((prev) => [...prev, tag]);
+				onTagsChange([...usedTags, tag]);
 			}
 			setText('');
 		}
 	};
 	const removeTag = (tagToRemove: string) => {
-		setUsedTags(usedTags.filter((tag) => tag !== tagToRemove));
+		onTagsChange(usedTags.filter((tag) => tag !== tagToRemove));
 	};
 
-	useEffect(() => {
-		onTagsChange(usedTags);
-	}, [usedTags]);
 	useEffect(() => {
 		if (!text.startsWith('#')) {
 			onSearchChange(text);

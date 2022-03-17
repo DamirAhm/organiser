@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { Route, Routes } from 'react-router-dom';
 import styled from 'styled-components';
@@ -85,9 +85,10 @@ const NotesWrapper = styled.div`
 type Props = {
 	search: string;
 	usedTags: string[];
+	toggleTag: (tag: string) => void;
 };
 
-const Notes: React.FC<Props> = ({ usedTags, search }) => {
+const Notes: React.FC<Props> = ({ usedTags, search, toggleTag }) => {
 	const { closeOpenedNote, openedNoteId } = useOpenedNote();
 	const { authToken } = useAuthToken();
 	const { openedSectionId } = useOpenedSection();
@@ -279,6 +280,22 @@ const Notes: React.FC<Props> = ({ usedTags, search }) => {
 		[deleteNoteAsync, authToken, openedNoteId, closeOpenedNote]
 	);
 
+	const filteredNotes = useMemo(
+		() =>
+			notesData
+				?.filter((note) =>
+					usedTags.every((usedTag) =>
+						note.tags.some(
+							(tag) => tag.toLowerCase() === usedTag.toLowerCase()
+						)
+					)
+				)
+				?.filter((note) =>
+					note.title.toLowerCase().includes(search.toLowerCase())
+				) ?? [],
+		[search, usedTags, notesData]
+	);
+
 	return (
 		<NotesContainer>
 			{!isCreating && (
@@ -288,29 +305,16 @@ const Notes: React.FC<Props> = ({ usedTags, search }) => {
 			)}
 			{notesData ? (
 				<NotesWrapper>
-					{notesData
-						.filter((note) =>
-							usedTags.every((usedTag) =>
-								note.tags.some(
-									(tag) =>
-										tag.toLowerCase() ===
-										usedTag.toLowerCase()
-								)
-							)
-						)
-						.filter((note) =>
-							note.title
-								.toLowerCase()
-								.includes(search.toLowerCase())
-						)
-						.map((note) => (
-							<NoteElement
-								onDeleteRequest={deleteNote}
-								search={search}
-								key={note.title}
-								{...note}
-							></NoteElement>
-						))}
+					{filteredNotes.map((note) => (
+						<NoteElement
+							onDeleteRequest={deleteNote}
+							onTagClick={toggleTag}
+							search={search}
+							usedTags={usedTags}
+							key={note.title}
+							{...note}
+						/>
+					))}
 				</NotesWrapper>
 			) : (
 				<LoaderPage imbedded />

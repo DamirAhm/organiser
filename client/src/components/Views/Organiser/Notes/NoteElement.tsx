@@ -32,6 +32,11 @@ export const NoteContainer = styled.div`
 		grid-row: 2;
 		width: 100%;
 	}
+
+	& .used > * {
+		background-color: var(--border-color);
+		color: white;
+	}
 `;
 
 export const NoteLink = styled.div`
@@ -68,7 +73,9 @@ export const NoteLink = styled.div`
 
 type Props = {
 	onDeleteRequest: (noteId: string) => void;
+	onTagClick: (tag: string) => void;
 	search: string;
+	usedTags: string[];
 } & NotePreview;
 
 const NoteElement: React.FC<Props> = ({
@@ -77,7 +84,9 @@ const NoteElement: React.FC<Props> = ({
 	id,
 	tags,
 	search,
+	usedTags,
 	onDeleteRequest,
+	onTagClick,
 }) => {
 	const { authToken } = useAuthToken();
 	const QueryClient = useQueryClient();
@@ -126,7 +135,16 @@ const NoteElement: React.FC<Props> = ({
 			</NoteLink>
 			<TagsContainer>
 				{tags.map((tag) => (
-					<Tag key={tag} name={tag} />
+					<div
+						className={
+							usedTags.some((usedTag) => usedTag === tag)
+								? 'used'
+								: ''
+						}
+						key={title + tag}
+					>
+						<Tag onClick={onTagClick} name={tag} />
+					</div>
 				))}
 			</TagsContainer>
 		</NoteContainer>
