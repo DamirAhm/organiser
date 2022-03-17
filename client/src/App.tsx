@@ -9,11 +9,9 @@ import getAuthorizedQuery, {
 import { AuthContextProvider, authToken } from './Contexts/AuthContext';
 import { LoaderPage } from './components/Views/LoaderPage';
 import getUserQuery, { GET_USER } from './api/Queries/getUser';
-import getSectionQuery, { GET_SECTION } from './api/Queries/getSection';
 import getSectionsListQuery, {
 	GET_SECTIONS_LIST,
 } from './api/Queries/getSectionsList';
-import { sectionId } from './hooks/useOpenedSection';
 
 const Auth = lazy(() => import('./components/Views/AuthPage'));
 const Organiser = lazy(() => import('./components/Views/Organiser'));
@@ -58,6 +56,7 @@ function App() {
 	}, [hasAuth]);
 
 	useEffect(() => {
+		console.log(isLoading, authorized);
 		if (!isLoading) {
 			if (!authorized) navigate('/auth');
 		}

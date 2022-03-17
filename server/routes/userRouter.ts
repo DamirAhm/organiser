@@ -8,7 +8,7 @@ import auth from '../auth';
 export const userRouter = Router();
 
 userRouter.get('/authorized', auth.optional, (req, res) => {
-	res.send({ authorized: (req as any).payload != undefined ? true : false });
+	res.send({ payload: (req as any).payload != undefined ? true : false });
 });
 
 userRouter.put('/', auth.required, (req, res, next) => {

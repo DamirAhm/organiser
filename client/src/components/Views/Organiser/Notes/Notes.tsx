@@ -183,6 +183,7 @@ const Notes: React.FC<Props> = ({}) => {
 											...note,
 											title:
 												noteUpdate.title ?? note.title,
+											tags: noteUpdate.tags ?? note.tags,
 									  }
 									: note
 						  )
