@@ -9,7 +9,7 @@ import useAuthToken from '../../../../hooks/useAuthToken';
 
 import NoteEditingModalWrapper from './Note/NoteEditingModalWrapper';
 import { NewNote } from '../../../../types';
-import NoteElement, { NoteContainer } from './NoteElement';
+import NoteElement, { NoteContainer, NoteLink } from './NoteElement';
 import NoteModalWrapper from './Note/NoteModalWrapper';
 
 import getNotesListQuery, {
@@ -78,7 +78,7 @@ const NotesWrapper = styled.div`
 	flex-direction: column;
 
 	& > ${NoteContainer} + ${NoteContainer} {
-		margin-top: 20px;
+		margin-top: 10px;
 	}
 `;
 
@@ -116,6 +116,7 @@ const Notes: React.FC<Props> = ({}) => {
 					return [
 						...(oldNotes ?? []),
 						{
+							tags: [],
 							title: newNoteData.title,
 							id: `placeholder-${Date.now()}`,
 							pinned: false,
@@ -132,7 +133,7 @@ const Notes: React.FC<Props> = ({}) => {
 		},
 		onSuccess: (newNoteData) => {
 			if (newNoteData !== null) {
-				const { title, id: noteId, pinned } = newNoteData;
+				const { title, id: noteId, pinned, tags } = newNoteData;
 				queryClient.cancelQueries([GET_NOTES_LIST, openedSectionId]);
 
 				queryClient.setQueryData<getNotesType>(
@@ -141,12 +142,17 @@ const Notes: React.FC<Props> = ({}) => {
 						if (oldNotes) {
 							return oldNotes.map((note) =>
 								note.title === title
-									? { title, id: noteId, pinned }
+									? { title, id: noteId, pinned, tags }
 									: note
 							);
 						}
 						return [];
 					}
+				);
+
+				queryClient.setQueryData<getNoteType>(
+					[GET_NOTE, noteId],
+					newNoteData
 				);
 			}
 		},

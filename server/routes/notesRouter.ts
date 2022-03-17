@@ -208,7 +208,8 @@ notesRouter.get('/list', auth.required, (req, res, next) => {
 				});
 
 				return res.json({
-					payload: notes.map(({ title, id, pinned }) => ({
+					payload: notes.map(({ title, id, pinned, tags }) => ({
+						tags,
 						title,
 						id,
 						pinned,

@@ -7,6 +7,8 @@ import useAuthToken from '../../../../hooks/useAuthToken';
 import { NotePreview } from '../../../../types';
 import { GoTrashcan } from 'react-icons/go';
 import { ColloredButton } from '../../../CommonStyled';
+import { TagsContainer } from './Note/NoteModalsStyles';
+import Tag from './Note/Tag';
 
 const CloseButton = styled(ColloredButton)`
 	grid-column: 3;
@@ -19,6 +21,19 @@ const CloseButton = styled(ColloredButton)`
 `;
 
 export const NoteContainer = styled.div`
+	display: grid;
+	grid-template-rows: 1fr 2rem;
+	grid-gap: 5px;
+
+	width: 100%;
+
+	& ${TagsContainer} {
+		grid-row: 2;
+		width: 100%;
+	}
+`;
+
+export const NoteLink = styled.div`
 	width: 100%;
 	height: 52px;
 	border: 1px solid var(--border-color);
@@ -28,10 +43,11 @@ export const NoteContainer = styled.div`
 	font-size: 1.3rem;
 	color: var(--text-color);
 	cursor: pointer;
-	display: grid;
-	grid-template-columns: 50px 1fr 50px;
 	align-items: center;
 	transition: 200ms;
+
+	display: grid;
+	grid-template-columns: 50px 1fr 50px;
 
 	&:hover,
 	&:focus {
@@ -57,6 +73,7 @@ const NoteElement: React.FC<Props> = ({
 	title,
 	pinned,
 	id,
+	tags,
 	onDeleteRequest,
 }) => {
 	const { authToken } = useAuthToken();
@@ -84,16 +101,26 @@ const NoteElement: React.FC<Props> = ({
 	);
 
 	return (
-		<NoteContainer
-			as={Link}
-			to={id}
-			onMouseEnter={prefetchNote}
-			tabIndex={0}
-		>
-			<span>{title}</span>
-			<CloseButton color='var(--negative)' onClick={deleteButtonHandler}>
-				<GoTrashcan size={24} viewBox='0 0 13 16' />
-			</CloseButton>
+		<NoteContainer>
+			<NoteLink
+				as={Link}
+				to={id}
+				onMouseEnter={prefetchNote}
+				tabIndex={0}
+			>
+				<span>{title}</span>
+				<CloseButton
+					color='var(--negative)'
+					onClick={deleteButtonHandler}
+				>
+					<GoTrashcan size={24} viewBox='0 0 13 16' />
+				</CloseButton>
+			</NoteLink>
+			<TagsContainer>
+				{tags.map((tag) => (
+					<Tag key={tag} name={tag} />
+				))}
+			</TagsContainer>
 		</NoteContainer>
 	);
 };

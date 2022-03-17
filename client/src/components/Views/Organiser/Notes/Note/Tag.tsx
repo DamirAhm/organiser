@@ -29,15 +29,14 @@ const RemoveButton = styled.button`
 type Props = {
 	name: string;
 	onRemove?: (name: string) => void;
-	removable?: boolean;
 };
 
-const Tag: React.FC<Props> = ({ name, onRemove, removable = true }) => {
+const Tag: React.FC<Props> = ({ name, onRemove }) => {
 	return (
 		<TagContainer>
 			{name}
-			{removable && (
-				<RemoveButton onClick={() => onRemove?.(name)}>
+			{onRemove && (
+				<RemoveButton onClick={() => onRemove(name)}>
 					<MdClose color={'var(--bold-text-color)'} size={20} />
 				</RemoveButton>
 			)}
