@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import styled from 'styled-components';
 import useNotesTags from '../../../../../hooks/useNotesTags';
 import Input from '../../../../Common/Input';
@@ -31,6 +31,8 @@ const TagsSection: React.FC<Props> = ({ onCreated, onRemoved, tags }) => {
 	const { tags: usedTags } = useNotesTags();
 	const [newTag, setNewTag] = useState('');
 
+	const inputRef = useRef<HTMLInputElement>(null);
+
 	const create = useCallback(() => {
 		if (tags.every((tag) => tag !== newTag)) {
 			onCreated(newTag);
@@ -39,11 +41,20 @@ const TagsSection: React.FC<Props> = ({ onCreated, onRemoved, tags }) => {
 		}
 	}, [newTag, onCreated]);
 
-	const remove = useCallback(
+	const removeTag = useCallback(
 		(name: string) => {
 			onRemoved(name);
 		},
 		[onRemoved]
+	);
+
+	const onTagClick = useCallback(
+		(tag: string) => {
+			removeTag(tag);
+			setNewTag(tag);
+			inputRef.current?.focus();
+		},
+		[removeTag, setNewTag]
 	);
 
 	return (
@@ -60,6 +71,7 @@ const TagsSection: React.FC<Props> = ({ onCreated, onRemoved, tags }) => {
 					value={newTag}
 					onChange={setNewTag}
 					list='editingTagsSuggestions'
+					ref={inputRef}
 				/>
 				<datalist id='editingTagsSuggestions'>
 					{usedTags.map((usedTag) => (
@@ -74,7 +86,12 @@ const TagsSection: React.FC<Props> = ({ onCreated, onRemoved, tags }) => {
 			</NewTagControls>
 			<TagsContainer>
 				{tags.map((tag) => (
-					<Tag key={tag} name={tag} onRemove={remove} />
+					<Tag
+						key={tag}
+						name={tag}
+						onClick={onTagClick}
+						onRemove={removeTag}
+					/>
 				))}
 			</TagsContainer>
 		</Container>

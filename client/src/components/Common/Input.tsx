@@ -1,11 +1,7 @@
 import React, { useCallback, useRef } from 'react';
+import { HTMLAttributes } from 'react';
 import { MdClose } from 'react-icons/md';
 import styled from 'styled-components';
-
-type Props = {
-	onChange: (e: string) => void;
-	value: string;
-} & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'>;
 
 const ClearButton = styled.button`
 	position: absolute;
@@ -43,6 +39,12 @@ const StyledInput = styled.input`
 	width: 100%;
 	font-size: 1.1rem;
 `;
+
+type Props = {
+	onChange: (e: string) => void;
+	value: string;
+	ref?: React.RefObject<HTMLInputElement>;
+} & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'>;
 
 const Input: React.FC<Props> = ({ onChange, value, ...props }) => {
 	const changeHandler = useCallback(

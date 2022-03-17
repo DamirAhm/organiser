@@ -22,6 +22,9 @@ export const TagContainer = styled.div<{ clickable: boolean }>`
 			background-color: var(--border-color);
 			cursor: pointer;
 		}
+		&:hover svg {
+			fill: white;
+		}
 	`}
 `;
 const RemoveButton = styled.button`
