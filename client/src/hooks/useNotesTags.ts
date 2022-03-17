@@ -12,7 +12,11 @@ const useNotesTags = () => {
 		openedSectionId,
 	]);
 
-	const allTags = notes?.map(({ tags }) => tags).flat() ?? [];
+	const allTags =
+		notes
+			?.map(({ tags }) => tags)
+			.flat()
+			.map((tag) => tag.toLowerCase()) ?? [];
 	const uniqueTags = useMemo(
 		() => allTags.filter((tag, i) => i === allTags.lastIndexOf(tag)),
 		[notes]
