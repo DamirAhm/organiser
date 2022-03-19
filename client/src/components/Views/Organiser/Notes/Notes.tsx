@@ -32,6 +32,7 @@ import changeNoteMutation, {
 	changeNoteType,
 } from '../../../../api/Mutations/changeNote';
 import { getNoteType, GET_NOTE } from '../../../../api/Queries/getNote';
+import { NotePreview } from '../../../../../../server/types';
 
 const NotesContainer = styled.div`
 	background-color: #eef;
@@ -84,11 +85,12 @@ const NotesWrapper = styled.div`
 
 type Props = {
 	search: string;
+	sort: (a: NotePreview, b: NotePreview) => number;
 	usedTags: string[];
 	toggleTag: (tag: string) => void;
 };
 
-const Notes: React.FC<Props> = ({ usedTags, search, toggleTag }) => {
+const Notes: React.FC<Props> = ({ usedTags, search, toggleTag, sort }) => {
 	const { closeOpenedNote, openedNoteId } = useOpenedNote();
 	const { authToken } = useAuthToken();
 	const { openedSectionId } = useOpenedSection();
@@ -295,6 +297,10 @@ const Notes: React.FC<Props> = ({ usedTags, search, toggleTag }) => {
 				) ?? [],
 		[search, usedTags, notesData]
 	);
+	const sortedNotes = useMemo(
+		() => filteredNotes.sort(sort),
+		[sort, filteredNotes]
+	);
 
 	return (
 		<NotesContainer>
@@ -305,7 +311,7 @@ const Notes: React.FC<Props> = ({ usedTags, search, toggleTag }) => {
 			)}
 			{notesData ? (
 				<NotesWrapper>
-					{filteredNotes.map((note) => (
+					{sortedNotes.map((note) => (
 						<NoteElement
 							onDeleteRequest={deleteNote}
 							onTagClick={toggleTag}

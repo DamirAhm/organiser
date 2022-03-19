@@ -1,4 +1,4 @@
-import React, { Suspense, useState } from 'react';
+import React, { Suspense, useMemo, useState } from 'react';
 import { useQuery } from 'react-query';
 import styled from 'styled-components';
 import useAuthToken from '../../../../hooks/useAuthToken';
@@ -11,6 +11,9 @@ import Filters from '../../../Common/Filters';
 import Notes from './Notes';
 import { LoaderPage } from '../../LoaderPage';
 import { useCallback } from 'react';
+import { NotePreview } from '../../../../types';
+import { HARDNESS_TAGS, URGENCY_TAGS } from '../../../../constants';
+import useNotesTags from '../../../../hooks/useNotesTags';
 
 type Props = {};
 
@@ -28,9 +31,77 @@ const Title = styled.h1`
 	color: var(--bold-text-color);
 `;
 
+enum sortOptions {
+	NO_SORT = 'Без сортировки',
+	TITLE = 'По названию',
+	TAGS = 'По тегам',
+	HARDNESS = 'По сложности',
+	URGENCY = 'По срочности',
+}
+
+const sorts: { [K: string]: (a: NotePreview, b: NotePreview) => number } = {
+	[sortOptions.NO_SORT]: () => -1,
+	[sortOptions.TITLE]: (a, b) => {
+		return a.title > b.title ? 1 : -1;
+	},
+	[sortOptions.TAGS]: (a, b) => {
+		const aTags = a.tags.sort((i, j) => (i > j ? 1 : -1));
+		const bTags = b.tags.sort((i, j) => (i > j ? 1 : -1));
+
+		for (let i = 0; i < Math.min(aTags.length, bTags.length); i++) {
+			if (aTags[i] > bTags[i]) return 1;
+		}
+
+		return aTags.length > bTags.length ? 1 : -1;
+	},
+	[sortOptions.HARDNESS]: (a, b) => {
+		if (a.tags.some((tag) => HARDNESS_TAGS.includes(tag))) {
+			if (b.tags.some((tag) => HARDNESS_TAGS.includes(tag))) {
+				const aHardnessTag = a.tags.find((tag) =>
+					HARDNESS_TAGS.includes(tag)
+				) as string;
+				const bHardnessTag = b.tags.find((tag) =>
+					HARDNESS_TAGS.includes(tag)
+				) as string;
+
+				return HARDNESS_TAGS.indexOf(aHardnessTag) >
+					HARDNESS_TAGS.indexOf(bHardnessTag)
+					? -1
+					: 1;
+			} else {
+				return -1;
+			}
+		}
+
+		return 1;
+	},
+	[sortOptions.URGENCY]: (a, b) => {
+		if (a.tags.some((tag) => URGENCY_TAGS.includes(tag))) {
+			if (b.tags.some((tag) => URGENCY_TAGS.includes(tag))) {
+				const aUrgencyTag = a.tags.find((tag) =>
+					URGENCY_TAGS.includes(tag)
+				) as string;
+				const bUrgencyTag = b.tags.find((tag) =>
+					URGENCY_TAGS.includes(tag)
+				) as string;
+
+				return URGENCY_TAGS.indexOf(aUrgencyTag) >
+					URGENCY_TAGS.indexOf(bUrgencyTag)
+					? -1
+					: 1;
+			} else {
+				return -1;
+			}
+		}
+
+		return 1;
+	},
+};
+
 const NotesSection: React.FC<Props> = ({}) => {
 	const { openedSectionId } = useOpenedSection();
 	const { authToken } = useAuthToken();
+	const { tags } = useNotesTags();
 
 	const { data: sectionData } = useQuery<getSectionType>(
 		[GET_SECTION, openedSectionId],
@@ -39,9 +110,7 @@ const NotesSection: React.FC<Props> = ({}) => {
 
 	const [search, setSearch] = useState('');
 	const [usedTags, setUsedTags] = useState<string[]>([]);
-	const [sortedBy, setSortedBy] = useState<string | undefined>();
-
-	const options = ['1', '2', '3', '4'];
+	const [sortedBy, setSortedBy] = useState<string>(sortOptions.NO_SORT);
 
 	const toggleTag = useCallback(
 		(tag: string) => {
@@ -54,6 +123,19 @@ const NotesSection: React.FC<Props> = ({}) => {
 		[usedTags, setUsedTags]
 	);
 
+	const sortsList = useMemo(() => {
+		let sorts = Object.values(sortOptions);
+
+		if (tags.every((tag) => !HARDNESS_TAGS.includes(tag))) {
+			sorts = sorts.filter((sort) => sort !== sortOptions.HARDNESS);
+		}
+		if (tags.every((tag) => !URGENCY_TAGS.includes(tag))) {
+			sorts = sorts.filter((sort) => sort !== sortOptions.URGENCY);
+		}
+
+		return sorts;
+	}, [tags]);
+
 	return (
 		<ContentContainer>
 			{sectionData && (
@@ -62,15 +144,16 @@ const NotesSection: React.FC<Props> = ({}) => {
 					<Filters
 						onSearchChange={setSearch}
 						onSortChange={setSortedBy}
-						sortsList={options}
+						sortsList={sortsList}
 						defaultSort={sortedBy}
 						onTagsChange={setUsedTags}
 						usedTags={usedTags}
 					/>
 					<Suspense fallback={<LoaderPage imbedded />}>
 						<Notes
-							toggleTag={toggleTag}
 							search={search}
+							sort={sorts[sortedBy]}
+							toggleTag={toggleTag}
 							usedTags={usedTags}
 						/>
 					</Suspense>

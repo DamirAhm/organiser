@@ -43,10 +43,10 @@ const StyledInput = styled.input`
 type Props = {
 	onChange: (e: string) => void;
 	value: string;
-	ref?: React.RefObject<HTMLInputElement>;
+	inputRef?: React.RefObject<HTMLInputElement>;
 } & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'>;
 
-const Input: React.FC<Props> = ({ onChange, value, ...props }) => {
+const Input: React.FC<Props> = ({ onChange, value, inputRef, ...props }) => {
 	const changeHandler = useCallback(
 		(e: React.ChangeEvent<HTMLInputElement>) => {
 			onChange(e.target.value);
@@ -57,10 +57,11 @@ const Input: React.FC<Props> = ({ onChange, value, ...props }) => {
 	return (
 		<InputContainer onClick={(e) => e.stopPropagation()}>
 			<StyledInput
+				{...props}
+				ref={inputRef}
 				type='text'
 				value={value}
 				onChange={changeHandler}
-				{...props}
 			/>
 		</InputContainer>
 	);

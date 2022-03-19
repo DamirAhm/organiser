@@ -54,7 +54,7 @@ const SelectContainer = styled(Filter)`
 interface Props extends HTMLAttributes<HTMLFormElement> {
 	defaultSort?: string;
 	sortsList: string[];
-	onSortChange: React.Dispatch<SetStateAction<string | undefined>>;
+	onSortChange: React.Dispatch<SetStateAction<string>>;
 	onSearchChange: React.Dispatch<SetStateAction<string>>;
 	onTagsChange: React.Dispatch<SetStateAction<string[]>>;
 	usedTags: string[];

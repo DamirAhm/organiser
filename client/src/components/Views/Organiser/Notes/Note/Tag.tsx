@@ -48,6 +48,11 @@ type Props = {
 };
 
 const Tag: React.FC<Props> = ({ name, onRemove, onClick }) => {
+	const stopPropagationOnRemove: React.MouseEventHandler = (e) => {
+		e.stopPropagation();
+		onRemove?.(name);
+	};
+
 	return (
 		<TagContainer
 			onClick={() => onClick?.(name)}
@@ -55,7 +60,7 @@ const Tag: React.FC<Props> = ({ name, onRemove, onClick }) => {
 		>
 			{name}
 			{onRemove && (
-				<RemoveButton type='button' onClick={() => onRemove(name)}>
+				<RemoveButton type='button' onClick={stopPropagationOnRemove}>
 					<MdClose color={'var(--bold-text-color)'} size={20} />
 				</RemoveButton>
 			)}

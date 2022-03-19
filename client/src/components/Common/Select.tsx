@@ -12,26 +12,22 @@ const SortByOption = styled.option``;
 type Props = {
 	options: optionType[];
 	value?: string;
-	onChange: React.Dispatch<SetStateAction<string | undefined>>;
+	onChange: React.Dispatch<SetStateAction<string>>;
 } & Omit<React.HTMLAttributes<HTMLSelectElement>, 'value' | 'onChange'>;
 
 function Select({ options, onChange, value, ...props }: Props) {
-	const onSortChange: React.ChangeEventHandler<HTMLOptionElement> =
-		useCallback((event) => {
-			onChange(event.target.value);
-		}, []);
+	const onSortChange: React.ChangeEventHandler<HTMLSelectElement> =
+		useCallback(
+			(event) => {
+				onChange(event.target.value);
+			},
+			[onChange]
+		);
 
 	return (
-		<SortBy {...props}>
-			<SortByOption onChange={onSortChange} value={undefined}>
-				{'Без сортировки'}
-			</SortByOption>
+		<SortBy {...props} onChange={onSortChange}>
 			{options.map((option, i) => (
-				<SortByOption
-					key={option.label}
-					onChange={onSortChange}
-					value={option.value}
-				>
+				<SortByOption key={option.label} value={option.value}>
 					{option.label}
 				</SortByOption>
 			))}

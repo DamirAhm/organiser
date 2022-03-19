@@ -71,7 +71,7 @@ const TagsSection: React.FC<Props> = ({ onCreated, onRemoved, tags }) => {
 					value={newTag}
 					onChange={setNewTag}
 					list='editingTagsSuggestions'
-					ref={inputRef}
+					inputRef={inputRef}
 				/>
 				<datalist id='editingTagsSuggestions'>
 					{usedTags.map((usedTag) => (
