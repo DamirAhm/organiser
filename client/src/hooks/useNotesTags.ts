@@ -20,9 +20,13 @@ const useNotesTags = () => {
 			.map((tag) => tag.toLowerCase()) ?? [];
 
 	const extendedTags = allTags.concat(HARDNESS_TAGS, URGENCY_TAGS);
+	console.log(extendedTags);
 
 	const uniqueTags = useMemo(
-		() => extendedTags.filter((tag, i) => i === allTags.lastIndexOf(tag)),
+		() =>
+			extendedTags.filter(
+				(tag, i) => i === extendedTags.lastIndexOf(tag)
+			),
 		[notes]
 	);
 
