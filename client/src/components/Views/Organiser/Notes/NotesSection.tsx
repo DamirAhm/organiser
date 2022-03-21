@@ -66,8 +66,8 @@ const sorts: { [K: string]: (a: NotePreview, b: NotePreview) => number } = {
 
 				return HARDNESS_TAGS.indexOf(aHardnessTag) >
 					HARDNESS_TAGS.indexOf(bHardnessTag)
-					? -1
-					: 1;
+					? 1
+					: -1;
 			} else {
 				return -1;
 			}
@@ -87,8 +87,8 @@ const sorts: { [K: string]: (a: NotePreview, b: NotePreview) => number } = {
 
 				return URGENCY_TAGS.indexOf(aUrgencyTag) >
 					URGENCY_TAGS.indexOf(bUrgencyTag)
-					? -1
-					: 1;
+					? 1
+					: -1;
 			} else {
 				return -1;
 			}
