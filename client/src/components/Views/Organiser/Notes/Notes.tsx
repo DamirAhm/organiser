@@ -122,7 +122,7 @@ const Notes: React.FC<Props> = ({ usedTags, search, toggleTag, sort }) => {
 					return [
 						...(oldNotes ?? []),
 						{
-							tags: [],
+							tags: newNoteData.tags,
 							title: newNoteData.title,
 							id: `placeholder-${Date.now()}`,
 							pinned: false,
