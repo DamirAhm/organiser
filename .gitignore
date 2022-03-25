@@ -6,3 +6,4 @@ package-lock.json
 dist
 .idea
 client.json
+server/uploads/*
