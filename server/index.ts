@@ -1,3 +1,4 @@
+import { filesRouter } from './routes/filesRouter';
 import mongoose from 'mongoose';
 import config from './database/config/config';
 import cors from 'cors';
@@ -7,11 +8,10 @@ import cookieParser from 'cookie-parser';
 import { notesRouter } from './routes/notesRouter';
 import { sectionsRouter } from './routes/sectionsRouter';
 import { userRouter } from './routes/userRouter';
+import { googleAuthRouter } from './routes/googleAuthRouter';
 import passport from 'passport';
 
 import './passport';
-import { googleAuthRouter } from './routes/googleAuthRouter';
-import auth from './auth';
 
 export const app = express();
 
@@ -37,6 +37,7 @@ export const app = express();
 		app.use('/sections', sectionsRouter);
 		app.use('/user', userRouter);
 		app.use('/google', googleAuthRouter);
+		app.use('/files', filesRouter);
 
 		app.get('/*', (req, res) => {
 			console.log('Error', req);
