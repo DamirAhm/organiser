@@ -1,10 +1,7 @@
-<<<<<<< HEAD
 import dotenv from 'dotenv';
 
 dotenv.config({ path: './.env' });
 
-=======
->>>>>>> db03b4745af07f980bce16868a173f5843f66d65
 import { filesRouter } from './routes/filesRouter';
 import mongoose from 'mongoose';
 import config from './database/config/config';
@@ -22,17 +19,8 @@ import path from 'path';
 import sirv from 'sirv';
 
 import './passport';
-<<<<<<< HEAD
 
 mkdir(path.join(__dirname, 'uploads'), {}, () => {});
-
-// const uploads = sirv(path.join(__dirname, 'uploads'), {
-// 	maxAge: 31536000, // 1Y
-// 	immutable: true,
-// 	brotli: true,
-// });
-=======
->>>>>>> db03b4745af07f980bce16868a173f5843f66d65
 
 export const app = express();
 
