@@ -9,6 +9,5 @@ export const TagsContainer = styled.ul`
 
 	& ${TagContainer} {
 		margin-right: 10px;
-		margin-bottom: 10px;
 	}
 `;

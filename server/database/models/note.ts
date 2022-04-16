@@ -1,9 +1,28 @@
 import { NoteDocument } from '../../types';
 import { model, Schema, SchemaTypes } from 'mongoose';
 
+const FileSchema = new Schema<any>(
+	{
+		fileName: {
+			type: String,
+			required: true,
+			unique: true,
+		},
+		mimeType: {
+			type: String,
+			required: true,
+		},
+		originalName: {
+			type: String,
+			required: true,
+		},
+	},
+	{ _id: false }
+);
+
 const NoteSchema = new Schema<NoteDocument>({
 	files: {
-		type: [String],
+		type: [FileSchema],
 		default: [],
 	},
 	subNotes: {

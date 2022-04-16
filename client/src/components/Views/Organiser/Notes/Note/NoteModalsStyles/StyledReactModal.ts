@@ -3,6 +3,7 @@ import styled from 'styled-components';
 export const StyledReactModal = styled.div`
 	width: min(90vw, 1000px);
 	height: min(90vh, 800px);
+	overflow-y: auto;
 	background-color: var(--background-color);
 	outline: none;
 	padding: 30px 40px;

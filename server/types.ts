@@ -1,8 +1,14 @@
 import { ObjectId, Document, Model } from 'mongoose';
 
+export type File = {
+	fileName: string;
+	mimeType: string;
+	originalName: string;
+};
+
 export type Note =
 	| {
-			files: string[];
+			files: File[];
 			title: string;
 			description: string;
 			subNotes: Id[];
@@ -14,7 +20,7 @@ export type Note =
 			id: Id;
 	  }
 	| {
-			files: string[];
+			files: File[];
 			title: string;
 			description: string;
 			subNotes: Id[];

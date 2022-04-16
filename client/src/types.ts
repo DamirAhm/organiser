@@ -30,12 +30,18 @@ export type Deleted = {
 	users?: string[];
 };
 
+export type File = {
+	fileName: string;
+	mimeType: string;
+	originalName: string;
+};
+
 export type Note =
 	| {
 			title: string;
 			description: string;
 			tags: string[];
-			files: string[];
+			files: File[];
 			subNotes: string[];
 			pinned: boolean;
 			user: string;
@@ -46,7 +52,7 @@ export type Note =
 			title: string;
 			description: string;
 			tags: string[];
-			files: string[];
+			files: File[];
 			subNotes: string[];
 			pinned: boolean;
 			id: string;

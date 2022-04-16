@@ -1,5 +1,10 @@
 import React, { useCallback, useState } from 'react';
-import { HeaderTitle, PoleName, TagsContainer } from './NoteModalsStyles';
+import {
+	HeaderTitle,
+	PoleName,
+	Section,
+	TagsContainer,
+} from './NoteModalsStyles';
 import styled from 'styled-components';
 import Tag from './Tag';
 import { useQuery } from 'react-query';
@@ -14,6 +19,8 @@ import { ColloredButton } from '../../../../CommonStyled';
 import { NewNote, Note } from '../../../../../types';
 import NoteEditingModalContent from './NoteEditingModal';
 import { replaceHrefsByAnchors } from '../../../../../utils/replaceHrefsByAnchors';
+import { SERVER_URL } from '../../../../../constants';
+import Files from '../../../../Common/Files';
 
 const Description = styled.span`
 	font-size: 1.2rem;
@@ -99,21 +106,24 @@ const NoteModalContent: React.FC<Props> = ({
 										</HeaderButton>
 									</HeaderControls>
 								</NoteModalHeader>
-								<TagsContainer>
-									{data.tags.map((tag) => (
-										<Tag
-											key={tag}
-											name={tag}
-											removable={false}
-										/>
-									))}
-								</TagsContainer>
+
+								<Section>
+									<TagsContainer>
+										{data.tags.map((tag) => (
+											<Tag key={tag} name={tag} />
+										))}
+									</TagsContainer>
+								</Section>
 								<hr />
-								<Description>
-									{descriptionWithReplacedHrefs}
-								</Description>
-								<PoleName>Файлы</PoleName>
-								<span>В разработке....</span>
+								<Section>
+									<Description>
+										{descriptionWithReplacedHrefs}
+									</Description>
+								</Section>
+
+								<Section>
+									<Files files={data.files} />
+								</Section>
 							</>
 						) : (
 							<NoteEditingModalContent

@@ -1,3 +1,7 @@
+import dotenv from 'dotenv';
+
+dotenv.config({ path: './.env' });
+
 import { filesRouter } from './routes/filesRouter';
 import mongoose from 'mongoose';
 import config from './database/config/config';
@@ -10,8 +14,19 @@ import { sectionsRouter } from './routes/sectionsRouter';
 import { userRouter } from './routes/userRouter';
 import { googleAuthRouter } from './routes/googleAuthRouter';
 import passport from 'passport';
+import { mkdir } from 'fs';
+import path from 'path';
+import sirv from 'sirv';
 
 import './passport';
+
+mkdir(path.join(__dirname, 'uploads'), {}, () => {});
+
+// const uploads = sirv(path.join(__dirname, 'uploads'), {
+// 	maxAge: 31536000, // 1Y
+// 	immutable: true,
+// 	brotli: true,
+// });
 
 export const app = express();
 
@@ -39,8 +54,16 @@ export const app = express();
 		app.use('/google', googleAuthRouter);
 		app.use('/files', filesRouter);
 
+		app.get('/uploads/:filename', (req, res) => {
+			const { filename } = req.params;
+
+			return res.sendFile(path.join(__dirname, 'uploads', filename));
+		});
+
 		app.get('/*', (req, res) => {
-			console.log('Error', req);
+			if (req instanceof Error) {
+				console.log('Error', req);
+			}
 		});
 
 		const PORT = process.env.PORT ?? 8080;

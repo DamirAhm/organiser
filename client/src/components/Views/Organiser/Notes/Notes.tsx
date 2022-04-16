@@ -330,6 +330,7 @@ const Notes: React.FC<Props> = ({ usedTags, search, toggleTag, sort }) => {
 				<NoteEditingModalWrapper
 					onFilled={createNote}
 					onRejected={stopCreating}
+					confirmButtonName={'Создать'}
 				/>
 			)}
 

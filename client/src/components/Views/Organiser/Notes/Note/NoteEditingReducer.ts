@@ -33,11 +33,11 @@ export default function NoteEditingReducer(
 				tags: state.tags.filter((tag) => tag !== payload),
 			};
 		}
-		case 'addFile': {
+		case 'addFiles': {
 			if (payload) {
 				return {
 					...state,
-					files: [...state.files, payload],
+					files: state.files.concat(payload),
 				};
 			} else {
 				return state;
@@ -46,7 +46,7 @@ export default function NoteEditingReducer(
 		case 'removeFile': {
 			return {
 				...state,
-				files: state.files.filter((file) => file !== payload),
+				files: state.files.filter((file) => file.fileName !== payload),
 			};
 		}
 		default: {
@@ -78,8 +78,8 @@ export type ActionType =
 			payload: string;
 	  }
 	| {
-			type: ActionTypes.ADD_FILE;
-			payload: string;
+			type: ActionTypes.ADD_FILES;
+			payload: File[];
 	  }
 	| {
 			type: ActionTypes.REMOVE_FILE;
@@ -91,6 +91,6 @@ export enum ActionTypes {
 	CHANGE_DESCRIPTION = 'changeDescription',
 	ADD_TAG = 'addTag',
 	REMOVE_TAG = 'removeTag',
-	ADD_FILE = 'addFile',
+	ADD_FILES = 'addFiles',
 	REMOVE_FILE = 'removeFile',
 }
