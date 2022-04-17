@@ -1,13 +1,7 @@
 import React, { useCallback, useReducer } from 'react';
-import ReactModal from 'react-modal';
 import { NewNote, File } from '../../../../../types';
 import Input from '../../../../Common/Input';
-import {
-	StyledReactModal,
-	HeaderTitle,
-	PoleName,
-	Section,
-} from './NoteModalsStyles';
+import { HeaderTitle, PoleName, Section } from './NoteModalsStyles';
 import NoteEditingReducer, {
 	ActionType,
 	ActionTypes,
@@ -16,11 +10,9 @@ import Textarea from '../../../../Common/TextArea';
 import TagsSection from './TagsSection';
 import styled from 'styled-components';
 import { ColloredButton } from '../../../../CommonStyled';
-import useNotesTags from '../../../../../hooks/useNotesTags';
 import FileUploader from '../../../../Common/FileUploader';
 import uploadFiles from '../../../../../api/uploadFiles';
 import useAuthToken from '../../../../../hooks/useAuthToken';
-import { SERVER_URL } from '../../../../../constants';
 import Files from '../../../../Common/Files';
 
 const InputContainer = styled.div`

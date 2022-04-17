@@ -4,6 +4,8 @@ import { SERVER_URL } from '../../constants';
 import { File as FileType } from '../../types';
 import { AiFillFile } from 'react-icons/ai';
 import { GoTrashcan } from 'react-icons/go';
+import { fileUrl } from '../../utils/fileUrl';
+import OpenableImg, { OpenableImgProps } from './OpenableImage';
 
 const FilesContainer = styled.div`
 	width: 100%;
@@ -29,7 +31,8 @@ const DeleteButton = styled.button`
 	background-color: var(--darken-background-color);
 
 	padding: 2px;
-	border-radius: 4px;
+	border-radius: 6px;
+	border: 1px solid var(--border-color);
 
 	top: 5%;
 	right: 2.5%;
@@ -63,10 +66,6 @@ const ImageContainer = styled.div`
 			display: inline;
 		}
 	}
-`;
-
-const Image = styled.img`
-	height: 100%;
 `;
 
 const FileLink = styled.a`
@@ -117,8 +116,6 @@ type Props = {
 	onFileRemoved?: (fileName: FileType) => void;
 };
 
-const fileUrl = ({ fileName }: FileType) => `${SERVER_URL}/uploads/${fileName}`;
-
 const isImage = ({ mimeType }: FileType) => mimeType.startsWith('image');
 
 const parseFileName = (fileName: string) =>
@@ -134,6 +131,23 @@ const shortFileName = ({ originalName }: FileType) => {
 	}
 };
 
+export const connectImages = (images: FileType[]): OpenableImgProps[] => {
+	const parsedAttachments: OpenableImgProps[] = images.map((file) => ({
+		file,
+	}));
+
+	if (parsedAttachments.length > 1) {
+		for (let i = 0; i < images.length; i++) {
+			parsedAttachments[i].nextImg =
+				parsedAttachments[(i + 1) % images.length];
+
+			parsedAttachments[i].prevImg = parsedAttachments.at(i - 1);
+		}
+	}
+
+	return parsedAttachments;
+};
+
 const Files: React.FC<Props> = ({ files, onFileRemoved }) => {
 	const [images, restFiles]: [FileType[], FileType[]] = useMemo(
 		() =>
@@ -146,17 +160,22 @@ const Files: React.FC<Props> = ({ files, onFileRemoved }) => {
 			),
 		[files]
 	);
+	const connectedImages = useMemo(() => connectImages(images), [images]);
 
 	return (
 		<FilesContainer>
 			<ImagesContainer>
-				{images.map((image, i) => (
-					<ImageContainer key={image.fileName} tabIndex={0}>
-						<Image src={fileUrl(image)} alt={image.originalName} />
+				{connectedImages.map(({ file, prevImg, nextImg }, i) => (
+					<ImageContainer key={file.fileName} tabIndex={0}>
+						<OpenableImg
+							file={file}
+							prevImg={prevImg}
+							nextImg={nextImg}
+						/>
 						{onFileRemoved !== undefined && (
 							<DeleteButton
 								tabIndex={0}
-								onClick={() => onFileRemoved(image)}
+								onClick={() => onFileRemoved(file)}
 							>
 								<GoTrashcan
 									color={'var(--negative)'}

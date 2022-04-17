@@ -3,7 +3,7 @@ import ReactModal from 'react-modal';
 import { useNavigate } from 'react-router-dom';
 import { NewNote } from '../../../../../types';
 import NoteEditingModalContent from './NoteEditingModal';
-import { StyledReactModal } from './NoteModalsStyles';
+import { StyledReactModal } from '../../../../CommonStyled/StyledReactModal';
 
 type Props = {
 	onFilled: (newNote: NewNote) => void;

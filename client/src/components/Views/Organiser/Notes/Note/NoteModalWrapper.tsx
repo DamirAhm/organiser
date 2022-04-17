@@ -3,7 +3,7 @@ import ReactModal from 'react-modal';
 import { useNavigate, useParams } from 'react-router-dom';
 import { NewNote } from '../../../../../types';
 import NoteModalContent from './NoteModal';
-import { StyledReactModal } from './NoteModalsStyles';
+import { StyledReactModal } from '../../../../CommonStyled/StyledReactModal';
 
 type Props = {
 	deleteNote: (noteId: string) => void;
