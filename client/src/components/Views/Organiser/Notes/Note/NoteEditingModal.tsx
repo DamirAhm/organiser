@@ -38,6 +38,11 @@ const ControlButton = styled(ColloredButton)`
 	color: var(--text-color);
 `;
 
+const FileUploadSectionHeader = styled.div`
+	display: flex;
+	justify-content: space-between;
+`;
+
 type Props = {
 	onFilled: (newNote: NewNote) => void;
 	onRejected: () => void;
@@ -147,9 +152,11 @@ const NoteEditingModalContent: React.FC<Props> = ({
 				/>
 			</Section>
 			<Section>
-				<PoleName>Файлы</PoleName>
+				<FileUploadSectionHeader>
+					<PoleName>Файлы</PoleName>
+					<FileUploader onChange={onFilesAdded} />
+				</FileUploadSectionHeader>
 				<Files files={newNote.files} onFileRemoved={onFileRemoved} />
-				<FileUploader onChange={onFilesAdded} />
 			</Section>
 
 			<CreationControls>
